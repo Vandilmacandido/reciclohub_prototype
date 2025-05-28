@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { MatchModalContainer } from "./modals/match";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,8 +17,9 @@ export const metadata: Metadata = {
   title: "RecicloHub",
   description: "Plataforma de Conexão para Reciclagem Sustentável",
   icons: {
-    icon: "/favicon.ico"
-}}
+    icon: "/favicon.ico",
+  },
+};
 
 export default function RootLayout({
   children,
@@ -25,10 +27,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html lang="pt-BR">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {/* MatchModalContainer ficará disponível em todas as páginas */}
+        <MatchModalContainer />
         {children}
       </body>
     </html>

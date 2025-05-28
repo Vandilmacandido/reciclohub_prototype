@@ -93,7 +93,8 @@ export default function RegisterStep3() {
           }
         }
       } catch (error) {
-        alert("Erro inesperado ao cadastrar usuário.")
+        console.error(error)
+        // Se desejar, adicione um feedback visual para o usuário aqui
       }
     }
   }

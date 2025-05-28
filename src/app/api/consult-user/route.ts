@@ -40,13 +40,15 @@ export async function GET(req: NextRequest) {
         return { id: doc.id, ...user }
       } else {
         // Não retorna senha na listagem geral
-        const { password, ...safeUser } = user
+        const safeUser = { ...user }
+        delete safeUser.password
         return { id: doc.id, ...safeUser }
       }
     })
 
     return NextResponse.json(data)
   } catch (error) {
+    console.error(error)
     return NextResponse.json({ error: "Erro ao consultar usuários." }, { status: 500 })
   }
 }
@@ -106,6 +108,7 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     )
   } catch (error) {
+    console.error(error)
     return NextResponse.json({ error: "Erro ao cadastrar usuário." }, { status: 500 })
   }
 }

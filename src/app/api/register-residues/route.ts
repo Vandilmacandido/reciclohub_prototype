@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ message: "Resíduo cadastrado com sucesso!", id: residueRef.id }, { status: 201 })
   } catch (error) {
+    console.error(error)
     return NextResponse.json({ error: "Erro ao cadastrar resíduo." }, { status: 500 })
   }
 }

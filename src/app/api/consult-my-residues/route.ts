@@ -22,6 +22,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(residues)
   } catch (error) {
+    console.error(error) // agora o error é usado
     return NextResponse.json({ error: "Erro ao consultar resíduos do usuário." }, { status: 500 })
   }
 }

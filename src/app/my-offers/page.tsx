@@ -2,9 +2,23 @@
 import { useEffect, useState } from "react"
 import { MoreVertical, Edit, Trash2, Eye } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
+
+interface Offer {
+  id: string
+  imagens?: string[]
+  tipoResiduo?: string
+  descricao?: string
+  quantidade?: number
+  unidade?: string
+  preco?: string
+  status?: string
+  createdAt?: { toDate?: () => string } | string
+  // Adicione outros campos conforme necessário
+}
 
 export default function MinhasOfertasPage() {
-  const [offers, setOffers] = useState<any[]>([])
+  const [offers, setOffers] = useState<Offer[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -58,6 +72,9 @@ export default function MinhasOfertasPage() {
               <Link href="/my-offers" className="hover:text-teal-200 transition-colors font-medium">
                 Minhas Ofertas
               </Link>
+              <Link href="/my-offers/proposals-received" className="hover:text-teal-200 transition-colors">
+                Propostas Recebidas
+              </Link>
               <Link href="/chat" className="hover:text-teal-200 transition-colors">
                 Chat
               </Link>
@@ -83,7 +100,13 @@ export default function MinhasOfertasPage() {
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="w-full md:w-32 h-24 bg-gray-300 rounded-lg overflow-hidden flex-shrink-0">
                   {offer.imagens && offer.imagens.length > 0 ? (
-                    <img src={offer.imagens[0]} alt="Resíduo" className="object-cover w-full h-full" />
+                    <Image
+                      src={offer.imagens[0]}
+                      alt="Resíduo"
+                      width={128}
+                      height={96}
+                      className="object-cover w-full h-full"
+                    />
                   ) : (
                     <span className="text-gray-400 flex items-center justify-center h-full">Sem imagem</span>
                   )}
@@ -124,8 +147,8 @@ export default function MinhasOfertasPage() {
                     <div>
                       <span className="font-medium">Criada em:</span>
                       <br />
-                      {offer.createdAt && offer.createdAt.toDate
-                        ? new Date(offer.createdAt.toDate()).toLocaleDateString()
+                      {offer.createdAt && typeof offer.createdAt === "object" && "toDate" in offer.createdAt
+                        ? new Date((offer.createdAt as { toDate: () => string }).toDate()).toLocaleDateString()
                         : (offer.createdAt && typeof offer.createdAt === "string"
                           ? new Date(offer.createdAt).toLocaleDateString()
                           : "-")}

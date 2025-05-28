@@ -1,19 +1,36 @@
 "use client"
 import { useState, useEffect } from "react"
-import { MapPin, Calendar, Truck, Heart, X, Search } from "lucide-react"
+import { MapPin, Truck, Heart, X, Search } from "lucide-react" // Removido Calendar
 import Link from "next/link"
 import { ProposalModal } from "../modals/proposal"
 import { MatchModal } from "../modals/match"
 import { useRouter } from "next/navigation"
+import Image from "next/image" // Adicionado para otimização de imagens
+
+// Defina um tipo para as ofertas
+interface WasteOffer {
+  id: string
+  companyName?: string
+  descricao?: string
+  preco?: string
+  imagens?: string[]
+  city?: string
+  state?: string
+  disponibilidade?: string
+  quantity?: number
+  frequency?: string
+  transportType?: string
+  [key: string]: unknown
+}
 
 export default function FeedPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedLocation, setSelectedLocation] = useState("")
-  const [selectedOffer, setSelectedOffer] = useState<any>(null)
+  const [selectedOffer, setSelectedOffer] = useState<WasteOffer | null>(null)
   const [showProposalModal, setShowProposalModal] = useState(false)
   const [showMatchModal, setShowMatchModal] = useState(false)
   const [rejectedOffers, setRejectedOffers] = useState<string[]>([])
-  const [wasteOffers, setWasteOffers] = useState<any[]>([])
+  const [wasteOffers, setWasteOffers] = useState<WasteOffer[]>([])
   const router = useRouter()
 
   // Carrega os resíduos do Firestore ao montar o componente
@@ -95,7 +112,11 @@ export default function FeedPage() {
     "Outras cidades"
   ]
 
+  const userId = typeof window !== "undefined" ? localStorage.getItem("userId") : null
+
   const filteredOffers = wasteOffers.filter((offer) => {
+    // Agora mostra todos os resíduos, inclusive os do usuário logado
+
     const matchesSearch =
       (offer.companyName?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
       (offer.descricao?.toLowerCase() || "").includes(searchTerm.toLowerCase())
@@ -107,7 +128,7 @@ export default function FeedPage() {
     return matchesSearch && matchesLocation && notRejected
   })
 
-  const handleProposal = (offer: any) => {
+  const handleProposal = (offer: WasteOffer) => {
     setSelectedOffer(offer)
     setShowProposalModal(true)
   }
@@ -116,11 +137,33 @@ export default function FeedPage() {
     setRejectedOffers((prev) => [...prev, offerId])
   }
 
-  const handleProposalSubmit = () => {
-    setShowProposalModal(false)
-    setTimeout(() => {
-      setShowMatchModal(true)
-    }, 1000)
+  const handleProposalSubmit = async () => {
+    if (!selectedOffer) {
+      console.error("Nenhuma oferta selecionada para proposta.")
+      return
+    }
+    try {
+      const data = {
+        residueId: selectedOffer.id,  
+        userBId: userId,
+        proposalData: {
+          quantity: selectedOffer.quantity,
+          frequency: selectedOffer.frequency,
+          price: selectedOffer.preco,
+          message: selectedOffer.descricao,
+          transportType: selectedOffer.transportType,
+        },
+      }
+      const response = await fetch("/api/make-proposals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      console.log(response)
+
+    } catch (error) {
+      console.error("Erro ao enviar proposta:", error)
+    }
   }
 
   const handleMatchClose = () => {
@@ -205,7 +248,13 @@ export default function FeedPage() {
                 {/* Imagem do resíduo */}
                 <div className="w-full md:w-48 h-40 bg-gray-300 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
                   {offer.imagens && offer.imagens.length > 0 ? (
-                    <img src={offer.imagens[0]} alt="Resíduo" className="object-cover w-full h-full" />
+                    <Image
+                      src={offer.imagens[0]}
+                      alt="Resíduo"
+                      width={192}
+                      height={160}
+                      className="object-cover w-full h-full"
+                    />
                   ) : (
                     <span className="text-gray-400">Sem imagem</span>
                   )}
@@ -281,10 +330,24 @@ export default function FeedPage() {
         isOpen={showProposalModal}
         onClose={() => setShowProposalModal(false)}
         onSubmit={handleProposalSubmit}
-        offer={selectedOffer}
+        offer={selectedOffer ? {
+          id: Number(selectedOffer.id),
+          company: selectedOffer.companyName || "Empresa",
+          wasteType: selectedOffer.descricao || "",
+          quantity: selectedOffer.quantity ? String(selectedOffer.quantity) : "",
+          // Adicione outros campos necessários para o tipo Offer aqui
+        } : null}
       />
 
-      <MatchModal isOpen={showMatchModal} onClose={handleMatchClose} offer={selectedOffer} />
+      <MatchModal
+        isOpen={showMatchModal}
+        onClose={handleMatchClose}
+        offer={selectedOffer ? {
+          id: selectedOffer.id,
+          company: selectedOffer.companyName || "Empresa",
+          // Adicione outros campos necessários para o tipo Offer aqui
+        } : null}
+      />
     </div>
   )
 }
