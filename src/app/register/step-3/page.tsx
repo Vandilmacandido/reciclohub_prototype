@@ -55,23 +55,45 @@ export default function RegisterStep3() {
     e.preventDefault()
     if (validateForm()) {
       try {
-        // Remova as variáveis não utilizadas para evitar o warning
-        // const step1Data = JSON.parse(localStorage.getItem("registrationStep1") || "{}")
-        // const step2Data = JSON.parse(localStorage.getItem("registrationStep2") || "{}")
-        // const completeRegistrationData = {
-        //   ...step1Data,
-        //   ...step2Data,
-        //   password: formData.password,
-        //   acceptTerms: formData.acceptTerms,
-        //   acceptPrivacy: formData.acceptPrivacy,
-        // }
-        // Aqui você pode enviar os dados para o backend
-        // await registerUser(completeRegistrationData)
-        localStorage.removeItem("registrationStep1")
-        localStorage.removeItem("registrationStep2")
-        router.push("/register/success")
+        // Pegue os dados das etapas anteriores
+        const step1Data = JSON.parse(localStorage.getItem("registrationStep1") || "{}")
+        const step2Data = JSON.parse(localStorage.getItem("registrationStep2") || "{}")
+        const completeRegistrationData = {
+          ...step1Data,
+          ...step2Data,
+          password: formData.password,
+          acceptTerms: formData.acceptTerms,
+          acceptPrivacy: formData.acceptPrivacy,
+        }
+
+        // Envie para a API de cadastro (register-user)
+        const response = await fetch("/api/register-user", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(completeRegistrationData),
+        })
+
+        if (response.ok) {
+          // Simule login: salve um token fake
+          localStorage.setItem("authToken", "fake-token")
+          // Limpe os dados temporários
+          localStorage.removeItem("registrationStep1")
+          localStorage.removeItem("registrationStep2")
+          // Redirecione para o feed
+          router.replace("/feed")
+        } else {
+          // Trate erro de cadastro
+          const error = await response.json()
+          if (error.error === "E-mail já cadastrado.") {
+            alert("E-mail já cadastrado. Faça login ou recupere sua senha.")
+          } else if (error.error === "CNPJ já cadastrado.") {
+            alert("CNPJ já cadastrado. Verifique seus dados ou entre em contato.")
+          } else {
+            alert(error.error || "Erro ao cadastrar usuário.")
+          }
+        }
       } catch (error) {
-        console.error("Registration error:", error)
+        alert("Erro inesperado ao cadastrar usuário.")
       }
     }
   }

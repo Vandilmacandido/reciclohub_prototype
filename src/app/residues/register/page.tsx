@@ -84,10 +84,53 @@ export default function CadastrarResiduoPage() {
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Dados do resíduo:", formData)
-    router.push("/dashboard")
+
+    // Pega o userId do usuário logado (exemplo: salvo no localStorage)
+    const userId = localStorage.getItem("userId")
+    if (!userId) {
+      alert("Usuário não autenticado. Faça login novamente.")
+      router.push("/")
+      return
+    }
+
+    // Faz upload das imagens (mock: salva apenas os nomes, para produção use Firebase Storage)
+    const imagensBase64: string[] = []
+    for (const file of formData.imagens) {
+      const base64 = await fileToBase64(file)
+      imagensBase64.push(base64)
+    }
+
+    const payload = {
+      ...formData,
+      imagens: imagensBase64,
+      userId,
+    }
+
+    const response = await fetch("/api/register-residues", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+
+    if (response.ok) {
+      alert("Resíduo cadastrado com sucesso!")
+      router.push("/my-offers")
+    } else {
+      const error = await response.json()
+      alert(error.error || "Erro ao cadastrar resíduo.")
+    }
+  }
+
+  // Função auxiliar para converter File em base64
+  function fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
   }
 
   const isFormValid = () => {

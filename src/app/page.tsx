@@ -20,11 +20,27 @@ export default function Home() {
     }
   }, [router])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Simulação de login: salve o token e redirecione
-    localStorage.setItem("authToken", "fake-token")
-    router.replace("/feed")
+
+    // Consulta o usuário pelo email
+    const res = await fetch(`/api/consult-user?email=${encodeURIComponent(email)}`)
+    const users = await res.json()
+
+    if (users.length === 0) {
+      alert("Usuário não encontrado. Cadastre-se para acessar a plataforma.")
+      return
+    }
+
+    // Verifica a senha (atenção: senha em texto puro, apenas para protótipo)
+    const user = users[0]
+    if (user && user.password === password) {
+      localStorage.setItem("authToken", "fake-token")
+      localStorage.setItem("userId", user.id) // Salva o id do usuário
+      router.replace("/feed")
+    } else {
+      alert("Senha incorreta.")
+    }
   }
 
   return (

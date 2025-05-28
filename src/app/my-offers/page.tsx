@@ -1,36 +1,30 @@
 "use client"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { MoreVertical, Edit, Trash2, Eye } from "lucide-react"
 import Link from "next/link"
 
-// Mock data for user's offers
-const userOffers = [
-  {
-    id: 1,
-    title: "Aparas de Papel Escritório",
-    material: "Papel branco de escritório, sem grampos ou clipes...",
-    quantity: "500 kg/mês",
-    price: "R$ 0,80/kg",
-    status: "Ativa",
-    interested: 3,
-    createdAt: "15/01/2025",
-    image: "/placeholder.svg?height=100&width=150",
-  },
-  {
-    id: 2,
-    title: "Resíduos Plásticos PET",
-    material: "Garrafas PET transparentes, limpas e prensadas...",
-    quantity: "200 kg/semana",
-    price: "R$ 1,20/kg",
-    status: "Pausada",
-    interested: 1,
-    createdAt: "10/01/2025",
-    image: "/placeholder.svg?height=100&width=150",
-  },
-]
-
 export default function MinhasOfertasPage() {
-  const [offers] = useState(userOffers)
+  const [offers, setOffers] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const userId = typeof window !== "undefined" ? localStorage.getItem("userId") : null
+    if (!userId) {
+      setOffers([])
+      setLoading(false)
+      return
+    }
+    fetch(`/api/consult-my-residues?userId=${userId}`)
+      .then(res => res.json())
+      .then(data => {
+        setOffers(data)
+        setLoading(false)
+      })
+      .catch(() => {
+        setOffers([])
+        setLoading(false)
+      })
+  }, [])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -61,10 +55,9 @@ export default function MinhasOfertasPage() {
               <Link href="/residues/register" className="hover:text-teal-200 transition-colors">
                 Publicar Oferta
               </Link>
-              <Link href="/minhas-ofertas" className="hover:text-teal-200 transition-colors font-medium">
+              <Link href="/my-offers" className="hover:text-teal-200 transition-colors font-medium">
                 Minhas Ofertas
               </Link>
-              {/* Removido: Minhas Negociações */}
               <Link href="/chat" className="hover:text-teal-200 transition-colors">
                 Chat
               </Link>
@@ -88,16 +81,22 @@ export default function MinhasOfertasPage() {
           {offers.map((offer) => (
             <div key={offer.id} className="bg-white rounded-lg shadow-sm p-6">
               <div className="flex flex-col md:flex-row gap-4">
-                <div className="w-full md:w-32 h-24 bg-gray-300 rounded-lg overflow-hidden flex-shrink-0" />
+                <div className="w-full md:w-32 h-24 bg-gray-300 rounded-lg overflow-hidden flex-shrink-0">
+                  {offer.imagens && offer.imagens.length > 0 ? (
+                    <img src={offer.imagens[0]} alt="Resíduo" className="object-cover w-full h-full" />
+                  ) : (
+                    <span className="text-gray-400 flex items-center justify-center h-full">Sem imagem</span>
+                  )}
+                </div>
                 <div className="flex-1">
                   <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-3">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1">{offer.title}</h3>
-                      <p className="text-gray-600 text-sm mb-2">{offer.material}</p>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-1">{offer.tipoResiduo || "Resíduo"}</h3>
+                      <p className="text-gray-600 text-sm mb-2">{offer.descricao}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor(offer.status)}`}>
-                        {offer.status}
+                      <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor(offer.status || "Ativa")}`}>
+                        {offer.status || "Ativa"}
                       </span>
                       <button className="p-2 rounded hover:bg-gray-100">
                         <MoreVertical className="w-4 h-4" />
@@ -109,22 +108,27 @@ export default function MinhasOfertasPage() {
                     <div>
                       <span className="font-medium">Quantidade:</span>
                       <br />
-                      {offer.quantity}
+                      {offer.quantidade} {offer.unidade}
                     </div>
                     <div>
                       <span className="font-medium">Preço:</span>
                       <br />
-                      {offer.price}
+                      {offer.preco || "Sob consulta"}
                     </div>
                     <div>
                       <span className="font-medium">Interessados:</span>
                       <br />
-                      {offer.interested} empresas
+                      {/* Adapte conforme implementação futura */}
+                      0 empresas
                     </div>
                     <div>
                       <span className="font-medium">Criada em:</span>
                       <br />
-                      {offer.createdAt}
+                      {offer.createdAt && offer.createdAt.toDate
+                        ? new Date(offer.createdAt.toDate()).toLocaleDateString()
+                        : (offer.createdAt && typeof offer.createdAt === "string"
+                          ? new Date(offer.createdAt).toLocaleDateString()
+                          : "-")}
                     </div>
                   </div>
 
@@ -157,7 +161,11 @@ export default function MinhasOfertasPage() {
           ))}
         </div>
 
-        {offers.length === 0 && (
+        {loading && (
+          <div className="text-center py-12 text-gray-500">Carregando...</div>
+        )}
+
+        {!loading && offers.length === 0 && (
           <div className="text-center py-12">
             <div className="text-gray-400 mb-4">
               <div className="w-16 h-16 mx-auto bg-gray-200 rounded-full flex items-center justify-center">

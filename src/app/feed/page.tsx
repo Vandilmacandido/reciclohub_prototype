@@ -1,57 +1,28 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { MapPin, Calendar, Truck, Heart, X, Search } from "lucide-react"
 import Link from "next/link"
 import { ProposalModal } from "../modals/proposal"
 import { MatchModal } from "../modals/match"
-
-// Mock data for waste offers
-const wasteOffers = [
-  {
-    id: 1,
-    company: "Lavanderia XXXXX",
-    material: "Material xxxx, tratado de forma xxxxx, armazenado em...",
-    location: "Recife - PE",
-    availability: "Retirada por Terceiros",
-    deadline: "xx/xx/2025",
-    price: "R$ 14,50/kg",
-    quantity: "500 kg/mês",
-    wasteType: "Têxtil",
-    image: "/placeholder.svg?height=150&width=200",
-  },
-  {
-    id: 2,
-    company: "Indústria Têxtil ABC",
-    material: "Retalhos de tecido 100% algodão, limpos e separados por cor...",
-    location: "Caruaru - PE",
-    availability: "Doação",
-    deadline: "15/02/2025",
-    price: "Gratuito",
-    quantity: "200 kg/semana",
-    wasteType: "Têxtil",
-    image: "/placeholder.svg?height=150&width=200",
-  },
-  {
-    id: 3,
-    company: "Metalúrgica XYZ",
-    material: "Aparas de aço inoxidável, sem contaminação, prontas para reciclagem...",
-    location: "Petrolina - PE",
-    availability: "Venda",
-    deadline: "28/01/2025",
-    price: "R$ 8,20/kg",
-    quantity: "1 tonelada/mês",
-    wasteType: "Metal",
-    image: "/placeholder.svg?height=150&width=200",
-  },
-]
+import { useRouter } from "next/navigation"
 
 export default function FeedPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedLocation, setSelectedLocation] = useState("")
-  const [selectedOffer, setSelectedOffer] = useState<(typeof wasteOffers)[0] | null>(null)
+  const [selectedOffer, setSelectedOffer] = useState<any>(null)
   const [showProposalModal, setShowProposalModal] = useState(false)
   const [showMatchModal, setShowMatchModal] = useState(false)
-  const [rejectedOffers, setRejectedOffers] = useState<number[]>([])
+  const [rejectedOffers, setRejectedOffers] = useState<string[]>([])
+  const [wasteOffers, setWasteOffers] = useState<any[]>([])
+  const router = useRouter()
+
+  // Carrega os resíduos do Firestore ao montar o componente
+  useEffect(() => {
+    fetch("/api/consult-residues")
+      .then(res => res.json())
+      .then(data => setWasteOffers(data))
+      .catch(() => setWasteOffers([]))
+  }, [])
 
   // Apenas cidades de Pernambuco (sem duplicatas)
   const locations = [
@@ -126,22 +97,22 @@ export default function FeedPage() {
 
   const filteredOffers = wasteOffers.filter((offer) => {
     const matchesSearch =
-      offer.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      offer.material.toLowerCase().includes(searchTerm.toLowerCase())
+      (offer.companyName?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (offer.descricao?.toLowerCase() || "").includes(searchTerm.toLowerCase())
     const matchesLocation =
       !selectedLocation ||
       selectedLocation === "Todas as cidades" ||
-      (offer.location.toLowerCase().includes(selectedLocation.toLowerCase()) && offer.location.toLowerCase().includes("pe"))
+      (offer.city?.toLowerCase().includes(selectedLocation.toLowerCase()) && offer.state?.toLowerCase() === "pe")
     const notRejected = !rejectedOffers.includes(offer.id)
     return matchesSearch && matchesLocation && notRejected
   })
 
-  const handleProposal = (offer: (typeof wasteOffers)[0]) => {
+  const handleProposal = (offer: any) => {
     setSelectedOffer(offer)
     setShowProposalModal(true)
   }
 
-  const handleReject = (offerId: number) => {
+  const handleReject = (offerId: string) => {
     setRejectedOffers((prev) => [...prev, offerId])
   }
 
@@ -159,6 +130,12 @@ export default function FeedPage() {
     }
   }
 
+  const handleLogout = () => {
+    localStorage.removeItem("authToken")
+    localStorage.removeItem("userId")
+    router.replace("/")
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
@@ -168,7 +145,7 @@ export default function FeedPage() {
             <Link href="/feed" className="text-2xl font-bold">
               RECICLOHUB
             </Link>
-            <nav className="hidden md:flex space-x-8">
+            <nav className="hidden md:flex space-x-8 items-center">
               <Link href="/feed" className="hover:text-teal-200 transition-colors font-medium">
                 Feed
               </Link>
@@ -178,10 +155,16 @@ export default function FeedPage() {
               <Link href="/my-offers" className="hover:text-teal-200 transition-colors">
                 Minhas Ofertas
               </Link>
-              {/* Removido: Minhas Negociações */}
               <Link href="/chat" className="hover:text-teal-200 transition-colors">
                 Chat
               </Link>
+              {/* Botão de logout */}
+              <button
+                onClick={handleLogout}
+                className="ml-4 px-4 py-2 bg-white text-teal-700 rounded hover:bg-teal-50 font-medium transition"
+              >
+                Sair
+              </button>
             </nav>
           </div>
         </div>
@@ -219,39 +202,40 @@ export default function FeedPage() {
           {filteredOffers.map((offer) => (
             <div key={offer.id} className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
               <div className="flex flex-col md:flex-row gap-6">
-                {/* Cinza área da imagem */}
-                <div className="w-full md:w-48 h-40 bg-gray-300 rounded-lg overflow-hidden flex-shrink-0" />
+                {/* Imagem do resíduo */}
+                <div className="w-full md:w-48 h-40 bg-gray-300 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
+                  {offer.imagens && offer.imagens.length > 0 ? (
+                    <img src={offer.imagens[0]} alt="Resíduo" className="object-cover w-full h-full" />
+                  ) : (
+                    <span className="text-gray-400">Sem imagem</span>
+                  )}
+                </div>
                 {/* Content */}
                 <div className="flex-1 space-y-3">
                   <div className="flex flex-col md:flex-row md:items-start md:justify-between">
                     <div className="flex-1">
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">{offer.company}</h3>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">{offer.companyName || "Empresa"}</h3>
                       <p className="text-gray-600 mb-3">
-                        {offer.material}{" "}
+                        {offer.descricao}
                         <button className="text-teal-600 hover:text-teal-700 font-medium underline">Ver mais.</button>
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm text-gray-500 mb-1">Preço Estimado:</p>
-                      <p className="text-xl font-bold text-gray-900">{offer.price}</p>
+                      <p className="text-xl font-bold text-gray-900">{offer.preco || "Sob consulta"}</p>
                     </div>
                   </div>
-
                   <div className="space-y-2 text-sm text-gray-600">
                     <div className="flex items-center gap-2">
                       <MapPin className="w-4 h-4 text-gray-400" />
-                      <span>Localização: {offer.location}</span>
+                      <span>Localização: {offer.city} - {offer.state}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Truck className="w-4 h-4 text-gray-400" />
-                      <span>Disponibilidade: {offer.availability}</span>
+                      <span>Disponibilidade: {offer.disponibilidade}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-gray-400" />
-                      <span>Prazo: {offer.deadline}</span>
-                    </div>
+                    {/* Adapte outros campos conforme necessário */}
                   </div>
-
                   {/* Match Actions */}
                   <div className="flex justify-center gap-4 pt-4">
                     <button
