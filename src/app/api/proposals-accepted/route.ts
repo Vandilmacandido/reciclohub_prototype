@@ -2,30 +2,6 @@ import { db } from "@/config/firebase.config"
 import { collection, getDocs, query, where } from "firebase/firestore"
 import { NextRequest, NextResponse } from "next/server"
 
-interface ResidueData {
-  // Adicione os campos relevantes conforme seu modelo
-  [key: string]: unknown
-}
-
-interface ProposalData {
-  // Adicione os campos relevantes conforme seu modelo
-  [key: string]: unknown
-}
-
-interface ProposalAccepted {
-  id: string
-  residueId: string
-  userAId: string
-  userBId: string
-  residueData: ResidueData
-  proposalData: ProposalData
-  statusA: boolean
-  statusB: boolean
-  createdAt: Date
-  notifiedUserIds: string[]
-  acceptedAt: Date
-}
-
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
@@ -36,27 +12,24 @@ export async function GET(req: NextRequest) {
     }
 
     // Busca propostas aceitas onde o userAId OU userBId é igual ao userId
-    const proposalsQuery = query(
+    const userAQuery = query(
       collection(db, "proposalAccepted"),
-      where("notifiedUserIds", "array-contains-any", [userId])
+      where("userAId", "==", userId)
     )
-    const snapshot = await getDocs(proposalsQuery)
-    const proposals: ProposalAccepted[] = snapshot.docs.map(doc => {
-      const data = doc.data()
-      return {
-        id: doc.id,
-        residueId: data.residueId,
-        userAId: data.userAId,
-        userBId: data.userBId,
-        residueData: data.residueData,
-        proposalData: data.proposalData,
-        statusA: data.statusA,
-        statusB: data.statusB,
-        createdAt: data.createdAt,
-        notifiedUserIds: data.notifiedUserIds,
-        acceptedAt: data.acceptedAt,
-      }
-    })
+    const userBQuery = query(
+      collection(db, "proposalAccepted"),
+      where("userBId", "==", userId)
+    )
+    const [userAResult, userBResult] = await Promise.all([
+      getDocs(userAQuery),
+      getDocs(userBQuery)
+    ])
+
+    // Junta e remove duplicados pelo id
+    const proposalsMap = new Map()
+    userAResult.docs.forEach(doc => proposalsMap.set(doc.id, { id: doc.id, ...doc.data() }))
+    userBResult.docs.forEach(doc => proposalsMap.set(doc.id, { id: doc.id, ...doc.data() }))
+    const proposals = Array.from(proposalsMap.values())
 
     return NextResponse.json(proposals)
   } catch (error) {
