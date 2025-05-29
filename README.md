@@ -10,8 +10,12 @@ Plataforma de conexão para reciclagem sustentável, desenvolvida em [Next.js](h
 - [Estrutura do Projeto](#estrutura-do-projeto)
 - [Funcionalidades Principais](#funcionalidades-principais)
 - [Como rodar o projeto](#como-rodar-o-projeto)
+- [Explicação das Rotas (API)](#explicação-das-rotas-api)
+- [Explicação dos Componentes/Páginas](#explicação-dos-componentespáginas)
 - [Padrões e Tecnologias](#padrões-e-tecnologias)
 - [Próximos Passos (Backend)](#próximos-passos-backend)
+- [Observações](#observações)
+- [Contato](#contato)
 
 ---
 
@@ -34,9 +38,23 @@ src/
     modals/              # Modais reutilizáveis (proposta, match, etc)
     my-offers/           # Página "Minhas Ofertas"
     register/            # Fluxo de cadastro multi-etapas
+      step-2/
+      step-3/
+      success/
     residues/
       register/          # Cadastro de nova oferta de resíduo
     chat/                # Tela de chat e negociações
+    api/                 # Rotas de API (Next.js Route Handlers)
+      accept-proposal/
+      consult-my-residues/
+      consult-residues/
+      consult-user/
+      make-proposals/
+      proposal-match-unique/
+      proposals-accepted/
+      received-proposal/
+      register-residues/
+      register-user/
     globals.css          # Estilos globais
     layout.tsx           # Layout principal
     page.tsx             # Página de login
@@ -57,6 +75,7 @@ public/
 - **Minhas Ofertas:** Listagem das ofertas cadastradas pelo usuário, com ações de visualizar, editar e excluir (mock).
 - **Chat:** Tela de conversas simuladas entre empresas.
 - **Componentização:** Todos os modais e formulários são feitos sem bibliotecas de UI externas, apenas TailwindCSS e React.
+- **Persistência:** Dados são salvos e consultados no Firestore (Firebase).
 
 ---
 
@@ -76,6 +95,86 @@ public/
 
 ---
 
+## Explicação das Rotas (API)
+
+Todas as rotas estão em `src/app/api/` e usam Firestore como backend.
+
+### `/api/register-user/route.ts`
+- **POST**: Cadastra um novo usuário. Valida campos obrigatórios, verifica duplicidade de email e CNPJ, salva no Firestore e retorna o ID criado.
+
+### `/api/consult-user/route.ts`
+- **GET**: Consulta usuários. Se passado `email` na query, retorna usuário (incluindo senha, para login simulado). Sem parâmetro, retorna todos (sem senha).
+- **POST**: Alternativa para cadastro de usuário (não utilizada no fluxo principal).
+
+### `/api/register-residues/route.ts`
+- **POST**: Cadastra uma nova oferta de resíduo, incluindo imagens (em base64), dados do resíduo e ID do usuário. Busca o nome da empresa do usuário para salvar junto.
+
+### `/api/consult-residues/route.ts`
+- **GET**: Lista todos os resíduos cadastrados no sistema.
+
+### `/api/consult-my-residues/route.ts`
+- **GET**: Lista resíduos cadastrados pelo usuário logado (filtra por `userId`).
+
+### `/api/make-proposals/route.ts`
+- **POST**: Envia uma proposta para um resíduo. Cria documento em `proposals` com status e IDs dos envolvidos.
+
+### `/api/received-proposal/route.ts`
+- **GET**: Lista propostas recebidas pelo usuário (usuário é dono do resíduo).
+
+### `/api/accept-proposal/route.ts`
+- **PATCH**: Aceita uma proposta. Atualiza status, move para `proposalAccepted`, marca como notificado e remove da coleção original.
+
+### `/api/proposals-accepted/route.ts`
+- **GET**: Lista todas as propostas aceitas onde o usuário está envolvido (userAId ou userBId).
+
+### `/api/proposal-match-unique/route.ts`
+- **PATCH**: Marca um usuário como notificado para um match específico (adiciona no array `notifiedUserIds`).
+
+---
+
+## Explicação dos Componentes/Páginas
+
+### `src/app/layout.tsx`
+- Layout global do projeto. Inclui fonte, estilos globais e o `MatchModalContainer` (modal de match disponível em todas as páginas).
+
+### `src/app/page.tsx`
+- **Login:** Formulário de login simulado. Consulta usuário por email, verifica senha (texto puro, apenas protótipo), salva token fake e userId no localStorage.
+
+### `src/app/feed/page.tsx`
+- **Feed de Ofertas:** Lista resíduos disponíveis, com filtros por cidade e busca textual. Permite abrir modal de proposta e visualizar detalhes do resíduo.
+
+### `src/app/my-offers/page.tsx`
+- **Minhas Ofertas:** Lista resíduos cadastrados pelo usuário logado. Permite visualizar, editar e excluir (ações de editar/excluir são mock).
+
+### `src/app/my-offers/proposals-received/page.tsx`
+- **Propostas Recebidas:** Lista propostas recebidas para os resíduos do usuário. Permite aceitar propostas e visualizar matches.
+
+### `src/app/register/page.tsx`
+- **Cadastro (Etapa 1):** Formulário inicial de cadastro (nome da empresa, email, CNPJ).
+
+### `src/app/register/step-2/page.tsx`
+- **Cadastro (Etapa 2):** Formulário de endereço (CEP, rua, cidade, estado, país).
+
+### `src/app/register/step-3/page.tsx`
+- **Cadastro (Etapa 3):** Criação de senha, aceite de termos e política de privacidade. Ao finalizar, envia dados para a API e faz login automático.
+
+### `src/app/register/success/page.tsx`
+- **Cadastro Sucesso:** Página de confirmação de cadastro (opcional, pode ser usada após cadastro).
+
+### `src/app/residues/register/page.tsx`
+- **Cadastro de Resíduo:** Formulário completo para cadastrar nova oferta de resíduo, com upload de até 5 imagens, seleção de tipo, quantidade, condições, disponibilidade e preço.
+
+### `src/app/chat/page.tsx`
+- **Chat:** Tela de conversas simuladas entre empresas. Mostra lista de matches e últimas mensagens (mock).
+
+### `src/app/modals/proposal.tsx`
+- **ProposalModal:** Modal para envio de proposta para uma oferta de resíduo.
+
+### `src/app/modals/match.tsx`
+- **MatchModal:** Modal exibido quando há um match aceito entre empresas. O `MatchModalContainer` verifica periodicamente se há matches não notificados para o usuário logado.
+
+---
+
 ## Padrões e Tecnologias
 
 - **Next.js App Router** (diretório `/app`)
@@ -83,14 +182,14 @@ public/
 - **TailwindCSS** para estilização
 - **React Hooks** para controle de estado e efeitos
 - **Sem dependências de UI externas** (componentes de formulário e modal feitos manualmente)
-- **Mock de dados** para ofertas, usuários e chat (sem backend ainda)
+- **Firebase Firestore** para persistência de dados
 - **Validação de formulários** feita manualmente em cada etapa
 
 ---
 
 ## Próximos Passos (Backend)
 
-O projeto atualmente é apenas frontend. Para iniciar o backend:
+O projeto já utiliza Firestore como backend, mas para evoluir para um backend próprio:
 
 1. Crie uma pasta `backend` na raiz do projeto.
 2. Inicialize um projeto Node.js com Express e TypeScript.
@@ -107,8 +206,8 @@ O projeto atualmente é apenas frontend. Para iniciar o backend:
 ## Observações
 
 - Todas as cidades listadas nos filtros e nas ofertas são do estado de Pernambuco.
-- O fluxo de cadastro e publicação de ofertas é totalmente funcional no frontend, mas não persiste dados em banco.
-- O projeto está pronto para receber integração com backend REST ou GraphQL.
+- O fluxo de cadastro e publicação de ofertas é totalmente funcional e persistido no Firestore.
+- O projeto está pronto para receber integração com backend REST ou GraphQL, caso queira migrar do Firebase.
 
 ---
 
