@@ -94,7 +94,7 @@ export default function RegisterPage() {
               value={formData.email}
               onChange={(e) => handleInputChange("email", e.target.value)}
               className="w-full px-4 py-3 border-2 border-teal-400 rounded-lg focus:border-teal-600 focus:ring-0 bg-white text-gray-900 placeholder-gray-400"
-              placeholder="Digite seu e-mail"
+              placeholder="Digite seu e-mail ex: empresatextil@gmail.com"
               required
             />
           </div>
@@ -119,7 +119,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={!isFormValid()}
-            className={`w-full bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 text-base`}
+            className={`w-full bg-teal-600 hover:bg-teal-700 hover:cursor-pointer disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 text-base`}
           >
             Próximo
           </button>
@@ -129,7 +129,7 @@ export default function RegisterPage() {
         <div className="text-center pt-4">
           <p className="text-teal-600 text-sm">
             Já possui uma conta?{" "}
-            <Link href="/login" className="font-medium hover:underline transition-colors">
+            <Link href="/login" className="font-medium underline hover:text-teal-700  transition-colors">
               Fazer login
             </Link>
           </p>

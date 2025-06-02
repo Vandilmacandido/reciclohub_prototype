@@ -145,22 +145,20 @@ export default function CadastrarResiduoPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <div className="bg-teal-600 px-4 py-6">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <h1 className="text-white text-xl md:text-2xl font-bold">CADASTRAR NOVO RESÍDUO</h1>
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4 md:mb-0">
+            Cadastrar Novo Resíduo
+          </h1>
           <button
             type="button"
             onClick={() => router.back()}
-            className="bg-white text-teal-600 border border-white rounded px-4 py-2 text-sm font-medium hover:bg-gray-100 transition"
+            className="bg-white text-teal-600 border border-teal-600 rounded px-4 py-2 text-sm font-medium hover:bg-teal-50 transition"
           >
             Cancelar
           </button>
         </div>
-      </div>
 
-      {/* Form */}
-      <div className="max-w-4xl mx-auto p-4 md:p-6">
         <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Tipo de Resíduo */}
@@ -172,7 +170,7 @@ export default function CadastrarResiduoPage() {
                 id="tipoResiduo"
                 value={formData.tipoResiduo}
                 onChange={(e) => handleInputChange("tipoResiduo", e.target.value)}
-                className="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full text-gray-400 bg-gray-100 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
               >
                 <option value="">Selecione o tipo de resíduo</option>
                 {tiposResiduos.map((tipo) => (
@@ -192,7 +190,7 @@ export default function CadastrarResiduoPage() {
                 id="descricao"
                 value={formData.descricao}
                 onChange={(e) => handleInputChange("descricao", e.target.value)}
-                className="w-full h-32 px-3 py-2 bg-gray-100 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full h-32 px-3 py-2 bg-gray-100 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent placeholder-gray-400 text-gray-400"
                 placeholder="Descreva detalhadamente o resíduo, suas características, origem, composição..."
               />
             </div>
@@ -205,13 +203,13 @@ export default function CadastrarResiduoPage() {
                   type="number"
                   value={formData.quantidade}
                   onChange={(e) => handleInputChange("quantidade", e.target.value)}
-                  className="bg-gray-100 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="bg-gray-100 border text-gray-400 border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400"
                   placeholder="Ex: 500"
                 />
                 <select
                   value={formData.unidade}
                   onChange={(e) => handleInputChange("unidade", e.target.value)}
-                  className="bg-gray-100 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="bg-gray-100 border text-gray-400 border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
                 >
                   {unidades.map((unidade) => (
                     <option key={unidade} value={unidade}>
@@ -231,7 +229,7 @@ export default function CadastrarResiduoPage() {
                 id="condicoes"
                 value={formData.condicoes}
                 onChange={(e) => handleInputChange("condicoes", e.target.value)}
-                className="w-full h-24 px-3 py-2 bg-gray-100 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full h-24 px-3 py-2 bg-gray-100 text-gray-400 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent placeholder-gray-400"
                 placeholder="Descreva como o resíduo está armazenado, condições ambientais, embalagem..."
               />
             </div>
@@ -292,7 +290,7 @@ export default function CadastrarResiduoPage() {
                 type="text"
                 value={formData.preco}
                 onChange={(e) => handleInputChange("preco", e.target.value)}
-                className="bg-gray-100 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="bg-gray-100 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 text-gray-400 focus:ring-teal-500 placeholder-gray-400"
                 placeholder="Ex: R$ 2,50 por kg"
                 disabled={formData.disponibilidade !== "venda"}
               />
@@ -348,11 +346,11 @@ export default function CadastrarResiduoPage() {
             </div>
 
             {/* Submit Button */}
-            <div className="pt-6">
+            <div className="pt-6 flex justify-end">
               <button
                 type="submit"
                 disabled={!isFormValid()}
-                className="w-full md:w-auto bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 text-white font-medium py-3 px-8 rounded-lg transition-colors duration-200"
+                className="bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 text-white font-medium py-3 px-8 rounded-lg transition-colors duration-200"
               >
                 Ofertar
               </button>

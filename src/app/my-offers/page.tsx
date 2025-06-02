@@ -1,7 +1,6 @@
 "use client"
 import { useEffect, useState } from "react"
 import { MoreVertical, Edit, Trash2, Eye } from "lucide-react"
-import Link from "next/link"
 import Image from "next/image"
 
 interface Offer {
@@ -55,43 +54,17 @@ export default function MinhasOfertasPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <header className="bg-teal-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/feed" className="text-2xl font-bold">
-              RECICLOHUB
-            </Link>
-            <nav className="hidden md:flex space-x-8">
-              <Link href="/feed" className="hover:text-teal-200 transition-colors">
-                Feed
-              </Link>
-              <Link href="/residues/register" className="hover:text-teal-200 transition-colors">
-                Publicar Oferta
-              </Link>
-              <Link href="/my-offers" className="hover:text-teal-200 transition-colors font-medium">
-                Minhas Ofertas
-              </Link>
-              <Link href="/my-offers/proposals-received" className="hover:text-teal-200 transition-colors">
-                Propostas Recebidas
-              </Link>
-              <Link href="/chat" className="hover:text-teal-200 transition-colors">
-                Chat
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
-
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-4 md:mb-0">Minhas Ofertas</h1>
-          <a
-            href="/residues/register"
-            className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded font-medium transition"
-          >
-            Nova Oferta
-          </a>
+          {offers.length > 0 && (
+            <a
+              href="/residues/register"
+              className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded font-medium transition"
+            >
+              Nova Oferta
+            </a>
+          )}
         </div>
 
         <div className="space-y-4">

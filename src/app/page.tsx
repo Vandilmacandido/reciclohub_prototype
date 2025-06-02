@@ -15,10 +15,42 @@ export default function Home() {
 
   useEffect(() => {
     // Se já estiver logado, redireciona para o feed
-    if (typeof window !== "undefined" && localStorage.getItem("authToken")) {
+    if (typeof window !== "undefined" && localStorage.getItem("token")) {
       router.replace("/feed")
     }
   }, [router])
+
+  // Função para verificar matches não notificados
+  interface Proposal {
+    id: string
+    matchId: string
+    companyName?: string
+    notifiedUserIds?: string[]
+    [key: string]: unknown
+  }
+
+  const checkForMatches = async (userId: string) => {
+    try {
+      const res = await fetch(`/api/proposals-accepted?userId=${userId}`)
+      const data: Proposal[] = await res.json()
+      
+      const notNotified = data.find(
+        (proposal) =>
+          !proposal.notifiedUserIds || !proposal.notifiedUserIds.includes(userId)
+      )
+
+      if (notNotified) {
+        // Salva no localStorage para o MatchModalContainer detectar
+        localStorage.setItem("pendingMatch", JSON.stringify({
+          id: notNotified.id,
+          matchId: notNotified.matchId,
+          company: notNotified.companyName || "Empresa Desconhecida"
+        }))
+      }
+    } catch (error) {
+      console.error("Erro ao verificar matches:", error)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,8 +67,13 @@ export default function Home() {
     // Verifica a senha (atenção: senha em texto puro, apenas para protótipo)
     const user = users[0]
     if (user && user.password === password) {
-      localStorage.setItem("authToken", "fake-token")
-      localStorage.setItem("userId", user.id) // Salva o id do usuário
+      localStorage.setItem("token", "fake-token")
+      localStorage.setItem("user", JSON.stringify({ id: user.id, email: user.email }))
+      localStorage.setItem("userId", user.id)
+      
+      // Verifica matches pendentes antes de redirecionar
+      await checkForMatches(user.id)
+      
       router.replace("/feed")
     } else {
       alert("Senha incorreta.")
@@ -99,7 +136,7 @@ export default function Home() {
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-teal-400 hover:text-teal-600 transition-colors"
                 tabIndex={-1}
               >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                {showPassword ? <EyeOff className="w-5 h-5 hover:cursor-pointer" /> : <Eye className="w-5 h-5 hover:cursor-pointer" />}
               </button>
             </div>
           </div>
@@ -112,7 +149,7 @@ export default function Home() {
                 type="checkbox"
                 checked={keepLoggedIn}
                 onChange={(e) => setKeepLoggedIn(e.target.checked)}
-                className="border-teal-400 accent-teal-600"
+                className="border-teal-400 accent-teal-600 cursor-pointer"
               />
               <label htmlFor="keep-logged-in" className="text-sm text-teal-600 cursor-pointer">
                 Manter conectado
@@ -129,7 +166,7 @@ export default function Home() {
           {/* Login Button */}
           <button
             type="submit"
-            className="w-full bg-teal-600 hover:bg-teal-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 text-base"
+            className="w-full bg-teal-600 hover:bg-teal-700 hover:cursor-pointer text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 text-base"
           >
             Entrar
           </button>
@@ -139,7 +176,7 @@ export default function Home() {
         <div className="text-center pt-4">
           <p className="text-teal-600 text-sm">
             Ainda não possui conta?{" "}
-            <Link href="/register" className="font-medium hover:underline transition-colors">
+            <Link href="/register" className="font-medium  hover:text-teal-700 underline transition-colors">
               Cadastre-se
             </Link>
           </p>

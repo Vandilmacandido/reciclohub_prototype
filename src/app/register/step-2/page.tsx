@@ -27,36 +27,6 @@ export default function RegisterStep2() {
     // Se quiser preencher algum campo a partir do step1, faça aqui
   }, [router])
 
-  const brazilianStates = [
-    { value: "AC", label: "Acre" },
-    { value: "AL", label: "Alagoas" },
-    { value: "AP", label: "Amapá" },
-    { value: "AM", label: "Amazonas" },
-    { value: "BA", label: "Bahia" },
-    { value: "CE", label: "Ceará" },
-    { value: "DF", label: "Distrito Federal" },
-    { value: "ES", label: "Espírito Santo" },
-    { value: "GO", label: "Goiás" },
-    { value: "MA", label: "Maranhão" },
-    { value: "MT", label: "Mato Grosso" },
-    { value: "MS", label: "Mato Grosso do Sul" },
-    { value: "MG", label: "Minas Gerais" },
-    { value: "PA", label: "Pará" },
-    { value: "PB", label: "Paraíba" },
-    { value: "PR", label: "Paraná" },
-    { value: "PE", label: "Pernambuco" },
-    { value: "PI", label: "Piauí" },
-    { value: "RJ", label: "Rio de Janeiro" },
-    { value: "RN", label: "Rio Grande do Norte" },
-    { value: "RS", label: "Rio Grande do Sul" },
-    { value: "RO", label: "Rondônia" },
-    { value: "RR", label: "Roraima" },
-    { value: "SC", label: "Santa Catarina" },
-    { value: "SP", label: "São Paulo" },
-    { value: "SE", label: "Sergipe" },
-    { value: "TO", label: "Tocantins" },
-  ]
-
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
     if (errors[field]) {
@@ -221,22 +191,13 @@ export default function RegisterStep2() {
                 <label htmlFor="state" className="text-teal-600 font-medium text-sm">
                   Estado *
                 </label>
-                <select
+                <input
                   id="state"
-                  value={formData.state}
-                  onChange={(e) => handleInputChange("state", e.target.value)}
-                  className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-0 bg-white text-gray-900 ${
-                    errors.state ? "border-red-400 focus:border-red-600" : "border-teal-400 focus:border-teal-600"
-                  }`}
-                >
-                  <option value="">UF</option>
-                  {brazilianStates.map((state) => (
-                    <option key={state.value} value={state.value}>
-                      {state.label}
-                    </option>
-                  ))}
-                </select>
-                {errors.state && <p className="text-red-500 text-xs">{errors.state}</p>}
+                  type="text"
+                  value="Pernambuco"
+                  disabled
+                  className="w-full px-4 py-3 border-2 border-teal-400 rounded-lg bg-gray-100 text-gray-900"
+                />
               </div>
             </div>
 
@@ -260,7 +221,7 @@ export default function RegisterStep2() {
           <div className="flex space-x-4 pt-4">
             <button
               type="button"
-              className="flex-1 bg-teal-100 hover:bg-teal-200 text-teal-700 border border-teal-300 font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+              className="flex-1 bg-[#7FD0D4] hover:bg-[#00A2AA] text-white border border-teal-300 hover:cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
               onClick={() => router.push("/register")}
             >
               <ChevronLeft className="w-4 h-4" />
@@ -269,7 +230,7 @@ export default function RegisterStep2() {
             <button
               type="submit"
               disabled={!isFormValid()}
-              className="flex-1 bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200"
+              className="flex-1 bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200 cursor-pointer"
             >
               Próximo
             </button>
@@ -280,7 +241,7 @@ export default function RegisterStep2() {
         <div className="text-center pt-4">
           <p className="text-teal-600 text-sm">
             Já possui uma conta?{" "}
-            <Link href="/login" className="font-medium hover:underline transition-colors">
+            <Link href="/login" className="font-medium hover:text-teal-700 underline transition-colors">
               Fazer login
             </Link>
           </p>

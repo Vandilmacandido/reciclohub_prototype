@@ -151,7 +151,9 @@ export default function RegisterStep3() {
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
                   onChange={(e) => handleInputChange("password", e.target.value)}
-                  className={`w-full px-4 py-3 pr-12 border-2 rounded-lg focus:ring-0 bg-white text-gray-900 placeholder-gray-400 ${
+                  autoComplete="new-password"
+                  inputMode="text"
+                  className={`appearance-none w-full px-4 py-3 pr-12 border-2 rounded-lg focus:ring-0 bg-white text-gray-900 placeholder-gray-400 ${
                     errors.password ? "border-red-400 focus:border-red-600" : "border-teal-400 focus:border-teal-600"
                   }`}
                   placeholder="Mínimo 8 caracteres"
@@ -159,8 +161,9 @@ export default function RegisterStep3() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-teal-400 hover:text-teal-600 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-teal-600 hover:text-teal-700 transition-colors"
                   tabIndex={-1}
+                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -179,7 +182,9 @@ export default function RegisterStep3() {
                   type={showConfirmPassword ? "text" : "password"}
                   value={formData.confirmPassword}
                   onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                  className={`w-full px-4 py-3 pr-12 border-2 rounded-lg focus:ring-0 bg-white text-gray-900 placeholder-gray-400 ${
+                  autoComplete="new-password"
+                  inputMode="text"
+                  className={`appearance-none w-full px-4 py-3 pr-12 border-2 rounded-lg focus:ring-0 bg-white text-gray-900 placeholder-gray-400 ${
                     errors.confirmPassword
                       ? "border-red-400 focus:border-red-600"
                       : "border-teal-400 focus:border-teal-600"
@@ -189,8 +194,9 @@ export default function RegisterStep3() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-teal-400 hover:text-teal-600 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-teal-600 hover:text-teal-700 transition-colors"
                   tabIndex={-1}
+                  aria-label={showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
                 >
                   {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -208,11 +214,11 @@ export default function RegisterStep3() {
                   type="checkbox"
                   checked={formData.acceptTerms}
                   onChange={(e) => handleInputChange("acceptTerms", e.target.checked)}
-                  className="border-teal-400 accent-teal-600 mt-1"
+                  className="border-teal-400 cursor-pointer accent-teal-600 mt-1"
                 />
                 <label htmlFor="acceptTerms" className="text-sm text-teal-700 cursor-pointer leading-relaxed">
                   Aceito os{" "}
-                  <a href="/terms" className="font-medium hover:underline" target="_blank" rel="noreferrer">
+                  <a href="/terms" className="font-medium underline" target="_blank" rel="noreferrer">
                     Termos de Uso
                   </a>{" "}
                   da plataforma RecicloHub
@@ -226,11 +232,11 @@ export default function RegisterStep3() {
                   type="checkbox"
                   checked={formData.acceptPrivacy}
                   onChange={(e) => handleInputChange("acceptPrivacy", e.target.checked)}
-                  className="border-teal-400 accent-teal-600 mt-1"
+                  className="border-teal-400 cursor-pointer accent-teal-600 mt-1"
                 />
                 <label htmlFor="acceptPrivacy" className="text-sm text-teal-700 cursor-pointer leading-relaxed">
                   Aceito a{" "}
-                  <a href="/privacy" className="font-medium hover:underline" target="_blank" rel="noreferrer">
+                  <a href="/privacy" className="font-medium underline" target="_blank" rel="noreferrer">
                     Política de Privacidade
                   </a>{" "}
                   e o tratamento dos meus dados
@@ -244,8 +250,8 @@ export default function RegisterStep3() {
           <div className="flex space-x-4 pt-4">
             <button
               type="button"
-              className="flex-1 bg-teal-100 hover:bg-teal-200 text-teal-700 border border-teal-300 font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
-              onClick={() => router.push("/register/step-2")}
+              className="flex-1 bg-[#7FD0D4] hover:bg-[#00A2AA] text-white border border-teal-300 hover:cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+              onClick={() => router.push("/register")}
             >
               <ChevronLeft className="w-4 h-4" />
               <span>Voltar</span>
@@ -253,7 +259,7 @@ export default function RegisterStep3() {
             <button
               type="submit"
               disabled={!isFormValid()}
-              className="flex-1 bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200"
+              className="flex-1 bg-teal-600 cursor-pointer hover:bg-teal-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200"
             >
               Finalizar Cadastro
             </button>
