@@ -155,10 +155,14 @@ export function MatchModalContainer() {
       setUserId(userData.id)
       try {
         const res = await fetch(`/api/proposals-accepted?userId=${userData.id}`)
-        const data = await res.json()
+        const data: Array<{
+          id: string
+          residueData?: { companyName?: string }
+          notifiedUserIds?: string[]
+        }> = await res.json()
         // Encontra o primeiro match não notificado
         const notNotified = data.find(
-          (proposal: any) =>
+          (proposal) =>
             !proposal.notifiedUserIds || !proposal.notifiedUserIds.includes(userData.id)
         )
         if (notNotified) {
@@ -169,7 +173,7 @@ export function MatchModalContainer() {
           })
           setShowMatchModal(true)
         }
-      } catch (error) {
+      } catch {
         // Silencie erros para não travar a experiência do usuário
       }
     }
