@@ -2,6 +2,7 @@
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState, useMemo } from "react"
 import Navbar from "./Navbar"
+import { MatchModalContainer } from "@/app/modals/match"
 
 export default function ConditionalLayout({
   children,
@@ -77,6 +78,7 @@ export default function ConditionalLayout({
       <>
         <Navbar />
         <div className="min-h-screen bg-[#F4FBFB] md:ml-64 pt-16 md:pt-0">
+          <MatchModalContainer />
           {children}
         </div>
       </>

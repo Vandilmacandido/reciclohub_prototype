@@ -85,6 +85,7 @@ export function MatchModal({ isOpen, onClose, offer }: MatchModalProps) {
 export function MatchModalContainer() {
   const [showMatchModal, setShowMatchModal] = useState(false)
   const [matchedOffer, setMatchedOffer] = useState<Offer | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
     // Verifica se há match pendente do login
@@ -103,6 +104,7 @@ export function MatchModalContainer() {
           const user = localStorage.getItem("user")
           if (user) {
             const userData = JSON.parse(user)
+            setUserId(userData.id)
             fetch("/api/proposal-match-unique", {
               method: "PATCH",
               headers: { "Content-Type": "application/json" },
@@ -132,6 +134,47 @@ export function MatchModalContainer() {
     return () => {
       window.removeEventListener("storage", handleStorageChange)
     }
+  }, [])
+
+  useEffect(() => {
+    if (showMatchModal && matchedOffer && userId) {
+      fetch("/api/proposal-match-unique", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ proposalId: matchedOffer.id, userId }),
+      })
+    }
+  }, [showMatchModal, matchedOffer, userId])
+
+  useEffect(() => {
+    // Busca matches aceitos e não notificados para o usuário logado
+    const fetchPendingMatch = async () => {
+      const user = localStorage.getItem("user")
+      if (!user) return
+      const userData = JSON.parse(user)
+      setUserId(userData.id)
+      try {
+        const res = await fetch(`/api/proposals-accepted?userId=${userData.id}`)
+        const data = await res.json()
+        // Encontra o primeiro match não notificado
+        const notNotified = data.find(
+          (proposal: any) =>
+            !proposal.notifiedUserIds || !proposal.notifiedUserIds.includes(userData.id)
+        )
+        if (notNotified) {
+          setMatchedOffer({
+            id: notNotified.id,
+            company: notNotified.residueData?.companyName || "Empresa",
+            matchId: notNotified.id,
+          })
+          setShowMatchModal(true)
+        }
+      } catch (error) {
+        // Silencie erros para não travar a experiência do usuário
+      }
+    }
+
+    fetchPendingMatch()
   }, [])
 
   const handleCloseModal = () => {
