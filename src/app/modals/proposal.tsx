@@ -86,7 +86,7 @@ export function ProposalModal({ isOpen, onClose, onSubmit, offer }: ProposalModa
                   onChange={(e) => handleInputChange("quantity", e.target.value)}
                   placeholder="Ex: 100 kg"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-400 placeholder-gray-400"
                 />
               </div>
 
@@ -99,13 +99,13 @@ export function ProposalModal({ isOpen, onClose, onSubmit, offer }: ProposalModa
                   value={formData.frequency}
                   onChange={(e) => handleInputChange("frequency", e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-400 placeholder-gray-400"
                 >
-                  <option value="">Selecione a frequência</option>
-                  <option value="semanal">Semanal</option>
-                  <option value="quinzenal">Quinzenal</option>
-                  <option value="mensal">Mensal</option>
-                  <option value="unica">Coleta Única</option>
+                  <option value="" className="text-gray-400">Selecione a frequência</option>
+                  <option value="semanal" className="text-gray-400">Semanal</option>
+                  <option value="quinzenal" className="text-gray-400">Quinzenal</option>
+                  <option value="mensal" className="text-gray-400">Mensal</option>
+                  <option value="unica" className="text-gray-400">Coleta Única</option>
                 </select>
               </div>
 
@@ -118,12 +118,12 @@ export function ProposalModal({ isOpen, onClose, onSubmit, offer }: ProposalModa
                   value={formData.transportType}
                   onChange={(e) => handleInputChange("transportType", e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-400 placeholder-gray-400"
                 >
-                  <option value="">Como será o transporte?</option>
-                  <option value="proprio">Transporte Próprio</option>
-                  <option value="terceirizado">Transporte Terceirizado</option>
-                  <option value="fornecedor">Transporte pelo Fornecedor</option>
+                  <option value="" className="text-gray-400">Como será o transporte?</option>
+                  <option value="proprio" className="text-gray-400">Transporte Próprio</option>
+                  <option value="terceirizado" className="text-gray-400">Transporte Terceirizado</option>
+                  <option value="fornecedor" className="text-gray-400">Transporte pelo Fornecedor</option>
                 </select>
               </div>
 
@@ -137,7 +137,7 @@ export function ProposalModal({ isOpen, onClose, onSubmit, offer }: ProposalModa
                   value={formData.price}
                   onChange={(e) => handleInputChange("price", e.target.value)}
                   placeholder="Ex: R$ 2,00/kg ou Gratuito"
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-400 placeholder-gray-400"
                 />
                 <p className="text-xs text-gray-500">Deixe em branco para aceitar o preço sugerido</p>
               </div>
@@ -150,7 +150,7 @@ export function ProposalModal({ isOpen, onClose, onSubmit, offer }: ProposalModa
                   id="message"
                   value={formData.message}
                   onChange={(e) => handleInputChange("message", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded resize-none h-20 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded resize-none h-20 focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-400 placeholder-gray-400"
                   placeholder="Adicione informações extras sobre sua proposta..."
                 />
               </div>
