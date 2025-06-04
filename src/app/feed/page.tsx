@@ -201,7 +201,7 @@ export default function FeedPage() {
           </div>
         </div>
 
-        <h1 className="text-2xl pt-4 font-bold text-gray-900 mb-4 md:mb-0">Resíduos Ofertados</h1>
+        <h1 className="text-2xl pt-4 pb-4 font-bold text-gray-900 mb-4 md:mb-0">Resíduos Ofertados</h1>
 
         {/* Waste Offers Grid */}
         <div className="space-y-4">
