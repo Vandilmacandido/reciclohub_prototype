@@ -175,7 +175,6 @@ export default function FeedPage() {
     <div className="min-h-screen bg-gray-100">
       {/* Título da página */}
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4 md:mb-0">Resíduos Ofertados</h1>
         {/* Search and Filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex-1 relative">
@@ -201,6 +200,8 @@ export default function FeedPage() {
             </select>
           </div>
         </div>
+
+        <h1 className="text-2xl pt-4 font-bold text-gray-900 mb-4 md:mb-0">Resíduos Ofertados</h1>
 
         {/* Waste Offers Grid */}
         <div className="space-y-4">
