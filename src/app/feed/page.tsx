@@ -173,8 +173,10 @@ export default function FeedPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Search and Filters */}
+      {/* Título da página */}
       <div className="max-w-7xl mx-auto px-4 py-6">
+        <h1 className="text-2xl font-bold text-gray-900 mb-4 md:mb-0">Resíduos Ofertados</h1>
+        {/* Search and Filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
