@@ -13,7 +13,17 @@ export default function ConditionalLayout({
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null) // null = loading
   
   // Páginas que não precisam de autenticação - usando useMemo para evitar recriação
-  const publicRoutes = useMemo(() => ['/', '/login', '/register'], [])
+  const publicRoutes = useMemo(
+    () => [
+      '/',
+      '/login',
+      '/register',
+      '/register/step-2',
+      '/register/step-3',
+      '/register/success'
+    ],
+    []
+  )
 
   useEffect(() => {
     const checkAuth = () => {
