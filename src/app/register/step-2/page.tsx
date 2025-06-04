@@ -11,7 +11,7 @@ export default function RegisterStep2() {
     cep: "",
     street: "",
     city: "",
-    state: "",
+    state: "Pernambuco", // Corrigido aqui
     country: "Brasil",
   })
 
