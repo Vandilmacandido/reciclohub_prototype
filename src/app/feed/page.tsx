@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import { MapPin, Truck, Heart, X, Search } from "lucide-react"
+import { Search } from "lucide-react"
 import Link from "next/link"
 import { ProposalModal } from "../modals/proposal"
 import { MatchModal } from "../modals/match"
@@ -131,10 +131,6 @@ export default function FeedPage() {
     setShowProposalModal(true)
   }
 
-  const handleReject = (offerId: string) => {
-    setRejectedOffers((prev) => [...prev, offerId])
-  }
-
   const handleProposalSubmit = async () => {
     if (!selectedOffer) {
       console.error("Nenhuma oferta selecionada para proposta.")
@@ -204,66 +200,48 @@ export default function FeedPage() {
         <h1 className="text-2xl pt-4 pb-4 font-bold text-gray-900 mb-4 md:mb-0">Resíduos Ofertados</h1>
 
         {/* Waste Offers Grid */}
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredOffers.map((offer) => (
-            <div key={offer.id} className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
-              <div className="flex flex-col md:flex-row gap-6">
-                {/* Imagem do resíduo */}
-                <div className="w-full md:w-48 h-40 bg-gray-300 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
-                  {offer.imagens && offer.imagens.length > 0 ? (
-                    <Image
-                      src={offer.imagens[0]}
-                      alt="Resíduo"
-                      width={192}
-                      height={160}
-                      className="object-cover w-full h-full"
-                    />
-                  ) : (
-                    <span className="text-gray-400">Sem imagem</span>
-                  )}
+            <div
+              key={offer.id}
+              className="bg-white border-2 border-teal-500 rounded-2xl shadow-sm flex flex-col overflow-hidden transition hover:shadow-md"
+              style={{ minHeight: 320 }}
+            >
+              {/* Imagem do resíduo */}
+              <div className="w-full h-40 bg-gray-200 flex items-center justify-center overflow-hidden rounded-t-2xl">
+                {offer.imagens && offer.imagens.length > 0 ? (
+                  <Image
+                    src={offer.imagens[0]}
+                    alt="Resíduo"
+                    width={400}
+                    height={160}
+                    className="object-cover w-full h-full"
+                  />
+                ) : (
+                  <span className="text-gray-400">Sem imagem</span>
+                )}
+              </div>
+              {/* Conteúdo */}
+              <div className="flex-1 flex flex-col justify-between px-5 py-4">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-1">{offer.descricao || "Resíduo"}</h3>
+                  <div className="flex justify-between text-gray-400 text-sm mb-2">
+                    <span>{offer.companyName || "Empresa"}</span>
+                    <span>
+                      {offer.quantity ? `${offer.quantity} kg disponíveis` : ""}
+                    </span>
+                  </div>
                 </div>
-                {/* Content */}
-                <div className="flex-1 space-y-3">
-                  <div className="flex flex-col md:flex-row md:items-start md:justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">{offer.companyName || "Empresa"}</h3>
-                      <p className="text-gray-600 mb-3">
-                        {offer.descricao}
-                        <button className="text-teal-600 hover:text-teal-700 font-medium underline">Ver mais.</button>
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-gray-500 mb-1">Preço Estimado:</p>
-                      <p className="text-xl font-bold text-gray-900">{offer.preco || "Sob consulta"}</p>
-                    </div>
-                  </div>
-                  <div className="space-y-2 text-sm text-gray-600">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-gray-400" />
-                      <span>Localização: {offer.city} - {offer.state}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Truck className="w-4 h-4 text-gray-400" />
-                      <span>Disponibilidade: {offer.disponibilidade}</span>
-                    </div>
-                  </div>
-                  {/* Match Actions */}
-                  <div className="flex justify-center gap-4 pt-4">
-                    <button
-                      type="button"
-                      onClick={() => handleReject(offer.id)}
-                      className="w-16 h-16 rounded-full border border-red-300 text-red-500 hover:bg-red-50 hover:border-red-400 flex items-center justify-center"
-                    >
-                      <X className="w-8 h-8" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleProposal(offer)}
-                      className="w-16 h-16 rounded-full bg-teal-600 hover:bg-teal-700 text-white flex items-center justify-center"
-                    >
-                      <Heart className="w-8 h-8" />
-                    </button>
-                  </div>
+                <div className="flex items-end justify-between mt-2">
+                  <span className="text-teal-600 font-bold text-base">
+                    {offer.preco ? `R$ ${offer.preco}` : "Sob consulta"}
+                  </span>
+                  <button
+                    className="bg-teal-600 cursor-pointer cursor-po hover:bg-teal-700 text-white text-xs font-semibold rounded-lg px-4 py-1 shadow transition"
+                    onClick={() => handleProposal(offer)}
+                  >
+                    Fazer Proposta
+                  </button>
                 </div>
               </div>
             </div>

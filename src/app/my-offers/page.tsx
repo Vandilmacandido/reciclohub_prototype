@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
-import { MoreVertical, Edit, Trash2, Eye } from "lucide-react"
+import { Trash2, Pencil } from "lucide-react"
+import { useRouter } from "next/navigation"
 import Image from "next/image"
 
 interface Offer {
@@ -19,6 +20,8 @@ interface Offer {
 export default function MinhasOfertasPage() {
   const [offers, setOffers] = useState<Offer[]>([])
   const [loading, setLoading] = useState(true)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const router = useRouter()
 
   useEffect(() => {
     const userId = typeof window !== "undefined" ? localStorage.getItem("userId") : null
@@ -39,17 +42,27 @@ export default function MinhasOfertasPage() {
       })
   }, [])
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Ativa":
-        return "bg-green-100 text-green-800"
-      case "Pausada":
-        return "bg-yellow-100 text-yellow-800"
-      case "Finalizada":
-        return "bg-gray-100 text-gray-800"
-      default:
-        return "bg-gray-100 text-gray-800"
+  const handleDelete = async (offerId: string) => {
+    const userId = typeof window !== "undefined" ? localStorage.getItem("userId") : null
+    if (!userId) return
+    if (!window.confirm("Tem certeza que deseja excluir este resíduo?")) return
+    setDeletingId(offerId)
+    try {
+      const res = await fetch("/api/delete-residue", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ residueId: offerId, userId }),
+      })
+      if (res.ok) {
+        setOffers(prev => prev.filter(o => o.id !== offerId))
+      } else {
+        const err = await res.json()
+        alert(err.error || "Erro ao excluir resíduo.")
+      }
+    } catch {
+      alert("Erro ao excluir resíduo.")
     }
+    setDeletingId(null)
   }
 
   return (
@@ -67,90 +80,57 @@ export default function MinhasOfertasPage() {
           )}
         </div>
 
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {offers.map((offer) => (
-            <div key={offer.id} className="bg-white rounded-lg shadow-sm p-6">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="w-full md:w-32 h-24 bg-gray-300 rounded-lg overflow-hidden flex-shrink-0">
-                  {offer.imagens && offer.imagens.length > 0 ? (
-                    <Image
-                      src={offer.imagens[0]}
-                      alt="Resíduo"
-                      width={128}
-                      height={96}
-                      className="object-cover w-full h-full"
-                    />
-                  ) : (
-                    <span className="text-gray-400 flex items-center justify-center h-full">Sem imagem</span>
-                  )}
+            <div
+              key={offer.id}
+              className="bg-white border-2 border-teal-500 rounded-2xl shadow-sm flex flex-col overflow-hidden transition hover:shadow-md relative"
+              style={{ minHeight: 320 }}
+            >
+              {/* Imagem do resíduo */}
+              <div className="w-full h-40 bg-gray-200 flex items-center justify-center overflow-hidden rounded-t-2xl relative">
+                {offer.imagens && offer.imagens.length > 0 ? (
+                  <Image
+                    src={offer.imagens[0]}
+                    alt="Resíduo"
+                    width={400}
+                    height={160}
+                    className="object-cover w-full h-full"
+                  />
+                ) : (
+                  <span className="text-gray-400">Sem imagem</span>
+                )}
+                {/* Ícone de edição */}
+                <button
+                  className="absolute top-2 right-2 bg-white rounded-full p-1 shadow hover:bg-gray-100 border border-teal-500"
+                  title="Editar"
+                  type="button"
+                  onClick={() => router.push(`/edit-residues/${offer.id}`)}
+                >
+                  <Pencil className="w-5 h-5 cursor-pointer text-teal-600" />
+                </button>
+              </div>
+              {/* Conteúdo */}
+              <div className="flex-1 flex flex-col justify-between px-5 py-4">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-1">{offer.descricao || "Resíduo"}</h3>
+                  <div className="flex justify-between text-gray-400 text-sm mb-2">
+                    <span>
+                      {offer.quantidade ? `${offer.quantidade} kg disponíveis` : ""}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-3">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1">{offer.tipoResiduo || "Resíduo"}</h3>
-                      <p className="text-gray-600 text-sm mb-2">{offer.descricao}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor(offer.status || "Ativa")}`}>
-                        {offer.status || "Ativa"}
-                      </span>
-                      <button className="p-2 rounded hover:bg-gray-100">
-                        <MoreVertical className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-4">
-                    <div>
-                      <span className="font-medium">Quantidade:</span>
-                      <br />
-                      {offer.quantidade} {offer.unidade}
-                    </div>
-                    <div>
-                      <span className="font-medium">Preço:</span>
-                      <br />
-                      {offer.preco || "Sob consulta"}
-                    </div>
-                    <div>
-                      <span className="font-medium">Interessados:</span>
-                      <br />
-                      {/* Adapte conforme implementação futura */}
-                      0 empresas
-                    </div>
-                    <div>
-                      <span className="font-medium">Criada em:</span>
-                      <br />
-                      {offer.createdAt && typeof offer.createdAt === "object" && "toDate" in offer.createdAt
-                        ? new Date((offer.createdAt as { toDate: () => string }).toDate()).toLocaleDateString()
-                        : (offer.createdAt && typeof offer.createdAt === "string"
-                          ? new Date(offer.createdAt).toLocaleDateString()
-                          : "-")}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    <a
-                      href="#"
-                      className="flex items-center px-3 py-2 border border-teal-600 text-teal-600 rounded hover:bg-teal-50 text-sm"
-                    >
-                      <Eye className="w-4 h-4 mr-1" />
-                      Ver Detalhes
-                    </a>
-                    <a
-                      href="#"
-                      className="flex items-center px-3 py-2 border border-gray-300 rounded hover:bg-gray-100 text-sm"
-                    >
-                      <Edit className="w-4 h-4 mr-1" />
-                      Editar
-                    </a>
-                    <button
-                      type="button"
-                      className="flex items-center px-3 py-2 border border-red-600 text-red-600 rounded hover:bg-red-50 text-sm"
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Excluir
-                    </button>
-                  </div>
+                <div className="flex items-end justify-between mt-2">
+                  <span className="text-teal-600 font-bold text-base">
+                    {offer.preco ? `R$ ${offer.preco}` : "Sob consulta"}
+                  </span>
+                  <button
+                    className="bg-red-700 cursor-pointer hover:bg-red-800 text-white text-xs font-semibold rounded-lg px-4 py-1 shadow transition"
+                    onClick={() => handleDelete(offer.id)}
+                    disabled={deletingId === offer.id}
+                  >
+                    {deletingId === offer.id ? "Excluindo..." : "Excluir"}
+                  </button>
                 </div>
               </div>
             </div>
