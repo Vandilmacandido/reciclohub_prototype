@@ -4,36 +4,46 @@ import { collection, addDoc, getDoc, doc } from "firebase/firestore"
 
 export async function POST(req: NextRequest) {
   try {
-    const data = await req.json()
+    const formData = await req.formData()
 
-    // Validação básica dos campos obrigatórios
+    const tipoResiduo = formData.get("tipoResiduo")
+    const descricao = formData.get("descricao")
+    const quantidade = formData.get("quantidade")
+    const unidade = formData.get("unidade")
+    const condicoes = formData.get("condicoes")
+    const disponibilidade = formData.get("disponibilidade")
+    const preco = formData.get("preco")
+    const userId = formData.get("userId")
+    const imagens = formData.getAll("imagens") // Array de arquivos
+
+    // Validação dos campos obrigatórios
     if (
-      !data.tipoResiduo ||
-      !data.descricao ||
-      !data.quantidade ||
-      !data.unidade ||
-      !data.condicoes ||
-      !data.disponibilidade ||
-      !data.userId
+      !tipoResiduo ||
+      !descricao ||
+      !quantidade ||
+      !unidade ||
+      !condicoes ||
+      !disponibilidade ||
+      !userId
     ) {
       return NextResponse.json({ error: "Dados obrigatórios faltando." }, { status: 400 })
     }
 
     // Busca o nome da empresa do usuário
-    const userDoc = await getDoc(doc(db, "users", data.userId))
+    const userDoc = await getDoc(doc(db, "users", userId.toString()))
     const companyName = userDoc.exists() ? userDoc.data().companyName : "Empresa"
 
     // Cria o resíduo no Firestore, incluindo o nome da empresa
     const residueRef = await addDoc(collection(db, "residues"), {
-      tipoResiduo: data.tipoResiduo,
-      descricao: data.descricao,
-      quantidade: data.quantidade,
-      unidade: data.unidade,
-      condicoes: data.condicoes,
-      disponibilidade: data.disponibilidade,
-      preco: data.preco || "",
-      imagens: data.imagens || [],
-      userId: data.userId,
+      tipoResiduo,
+      descricao,
+      quantidade,
+      unidade,
+      condicoes,
+      disponibilidade,
+      preco,
+      imagens,
+      userId,
       companyName, // Salva o nome da empresa
       createdAt: new Date(),
     })
