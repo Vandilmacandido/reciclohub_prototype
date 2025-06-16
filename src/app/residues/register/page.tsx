@@ -16,8 +16,8 @@ export default function CadastrarResiduoPage() {
     preco: "",
     imagens: [] as File[],
   })
-
   const [dragActive, setDragActive] = useState(false)
+  const [saving, setSaving] = useState(false) // NOVO
 
   const tiposResiduos = [
     "Plástico PET",
@@ -86,6 +86,8 @@ export default function CadastrarResiduoPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (saving) return // Evita múltiplos envios
+    setSaving(true)
 
     // Pega o userId do usuário logado (exemplo: salvo no localStorage)
     const userId = localStorage.getItem("userId")
@@ -121,6 +123,7 @@ export default function CadastrarResiduoPage() {
       const error = await response.json()
       alert(error.error || "Erro ao cadastrar resíduo.")
     }
+    setSaving(false) // Libera o botão após a resposta
   }
 
   // Função auxiliar para converter File em base64
@@ -349,10 +352,10 @@ export default function CadastrarResiduoPage() {
             <div className="pt-6 flex justify-end">
               <button
                 type="submit"
-                disabled={!isFormValid()}
+                disabled={!isFormValid() || saving}
                 className="bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 text-white font-medium py-3 px-8 rounded-lg transition-colors duration-200"
               >
-                Ofertar
+                {saving ? "Cadastrando..." : "Ofertar"}
               </button>
             </div>
           </form>
