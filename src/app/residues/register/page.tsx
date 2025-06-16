@@ -3,6 +3,7 @@
 import React, { useState } from "react"
 import { X, Camera } from "lucide-react"
 import { useRouter } from "next/navigation"
+import imageCompression from "browser-image-compression"
 
 export default function CadastrarResiduoPage() {
   const router = useRouter()
@@ -18,6 +19,7 @@ export default function CadastrarResiduoPage() {
   })
   const [dragActive, setDragActive] = useState(false)
   const [saving, setSaving] = useState(false) // NOVO
+  const [compressionProgress, setCompressionProgress] = useState<number | null>(null)
 
   const tiposResiduos = [
     "Plástico PET",
@@ -50,14 +52,39 @@ export default function CadastrarResiduoPage() {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleImageUpload = (files: FileList | null) => {
-    if (files) {
-      const newImages = Array.from(files).slice(0, 5)
-      setFormData((prev) => ({
-        ...prev,
-        imagens: [...prev.imagens, ...newImages].slice(0, 5),
-      }))
+  // Função auxiliar para processar arquivos de imagem (de input ou drop)
+  const processImageFiles = async (files: FileList | File[]) => {
+    const filesArray = Array.from(files).slice(0, 5 - formData.imagens.length)
+    const compressedImages: File[] = []
+
+    for (let i = 0; i < filesArray.length; i++) {
+      const imageFile = filesArray[i]
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+        onProgress: (progress: number) => setCompressionProgress(progress),
+      }
+      try {
+        setCompressionProgress(0)
+        const compressedFile = await imageCompression(imageFile, options)
+        compressedImages.push(compressedFile)
+      } catch (error) {
+        alert(`Erro ao comprimir a imagem ${imageFile.name}.`)
+        console.error(error)
+      }
     }
+    setCompressionProgress(null)
+    setFormData((prev) => ({
+      ...prev,
+      imagens: [...prev.imagens, ...compressedImages].slice(0, 5),
+    }))
+  }
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (!files || files.length === 0) return
+    await processImageFiles(files)
   }
 
   const handleDrag = (e: React.DragEvent) => {
@@ -74,7 +101,7 @@ export default function CadastrarResiduoPage() {
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
-    handleImageUpload(e.dataTransfer.files)
+    processImageFiles(e.dataTransfer.files)
   }
 
   const removeImage = (index: number) => {
@@ -313,12 +340,14 @@ export default function CadastrarResiduoPage() {
               >
                 <input
                   type="file"
-                  id="images"
-                  multiple
                   accept="image/*"
-                  onChange={(e) => handleImageUpload(e.target.files)}
-                  className="hidden"
+                  multiple
+                  onChange={handleImageUpload}
+                  disabled={formData.imagens.length >= 5}
                 />
+                {compressionProgress !== null && (
+                  <div>Comprimindo imagem: {compressionProgress}%</div>
+                )}
                 <label htmlFor="images" className="cursor-pointer">
                   <Camera className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                   <p className="text-gray-500">Clique ou arraste imagem para inserir</p>
