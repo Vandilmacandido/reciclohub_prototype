@@ -3,7 +3,6 @@
 import React, { useState } from "react"
 import { X, Camera } from "lucide-react"
 import { useRouter } from "next/navigation"
-import imageCompression from "browser-image-compression"
 
 export default function CadastrarResiduoPage() {
   const router = useRouter()
@@ -17,9 +16,8 @@ export default function CadastrarResiduoPage() {
     preco: "",
     imagens: [] as File[],
   })
+
   const [dragActive, setDragActive] = useState(false)
-  const [saving, setSaving] = useState(false) // NOVO
-  const [compressionProgress, setCompressionProgress] = useState<number | null>(null)
 
   const tiposResiduos = [
     "Plástico PET",
@@ -52,39 +50,14 @@ export default function CadastrarResiduoPage() {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  // Função auxiliar para processar arquivos de imagem (de input ou drop)
-  const processImageFiles = async (files: FileList | File[]) => {
-    const filesArray = Array.from(files).slice(0, 5 - formData.imagens.length)
-    const compressedImages: File[] = []
-
-    for (let i = 0; i < filesArray.length; i++) {
-      const imageFile = filesArray[i]
-      const options = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1920,
-        useWebWorker: true,
-        onProgress: (progress: number) => setCompressionProgress(progress),
-      }
-      try {
-        setCompressionProgress(0)
-        const compressedFile = await imageCompression(imageFile, options)
-        compressedImages.push(compressedFile)
-      } catch (error) {
-        alert(`Erro ao comprimir a imagem ${imageFile.name}.`)
-        console.error(error)
-      }
+  const handleImageUpload = (files: FileList | null) => {
+    if (files) {
+      const newImages = Array.from(files).slice(0, 5)
+      setFormData((prev) => ({
+        ...prev,
+        imagens: [...prev.imagens, ...newImages].slice(0, 5),
+      }))
     }
-    setCompressionProgress(null)
-    setFormData((prev) => ({
-      ...prev,
-      imagens: [...prev.imagens, ...compressedImages].slice(0, 5),
-    }))
-  }
-
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
-    if (!files || files.length === 0) return
-    await processImageFiles(files)
   }
 
   const handleDrag = (e: React.DragEvent) => {
@@ -101,7 +74,7 @@ export default function CadastrarResiduoPage() {
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
-    processImageFiles(e.dataTransfer.files)
+    handleImageUpload(e.dataTransfer.files)
   }
 
   const removeImage = (index: number) => {
@@ -113,37 +86,51 @@ export default function CadastrarResiduoPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (saving) return
-    setSaving(true)
 
-    const formDataToSend = new FormData()
-    formDataToSend.append("tipoResiduo", formData.tipoResiduo)
-    formDataToSend.append("descricao", formData.descricao)
-    formDataToSend.append("quantidade", formData.quantidade)
-    formDataToSend.append("unidade", formData.unidade)
-    formDataToSend.append("condicoes", formData.condicoes)
-    formDataToSend.append("disponibilidade", formData.disponibilidade)
-    formDataToSend.append("preco", formData.preco)
-    formData.imagens.forEach((img) => {
-      formDataToSend.append("imagens", img)
+    // Pega o userId do usuário logado (exemplo: salvo no localStorage)
+    const userId = localStorage.getItem("userId")
+    if (!userId) {
+      alert("Usuário não autenticado. Faça login novamente.")
+      router.push("/")
+      return
+    }
+
+    // Faz upload das imagens (mock: salva apenas os nomes, para produção use Firebase Storage)
+    const imagensBase64: string[] = []
+    for (const file of formData.imagens) {
+      const base64 = await fileToBase64(file)
+      imagensBase64.push(base64)
+    }
+
+    const payload = {
+      ...formData,
+      imagens: imagensBase64,
+      userId,
+    }
+
+    const response = await fetch("/api/register-residues", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
     })
 
-    try {
-      const response = await fetch("/api/register-residues", {
-        method: "POST",
-        body: formDataToSend,
-      })
-      if (response.ok) {
-        alert("Resíduo cadastrado com sucesso!")
-        router.push("/my-offers")
-      } else {
-        const error = await response.json()
-        alert(error.error || "Erro ao cadastrar resíduo.")
-      }
-    } catch {
-      alert("Erro ao cadastrar resíduo.")
+    if (response.ok) {
+      alert("Resíduo cadastrado com sucesso!")
+      router.push("/my-offers")
+    } else {
+      const error = await response.json()
+      alert(error.error || "Erro ao cadastrar resíduo.")
     }
-    setSaving(false)
+  }
+
+  // Função auxiliar para converter File em base64
+  function fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
   }
 
   const isFormValid = () => {
@@ -323,14 +310,12 @@ export default function CadastrarResiduoPage() {
               >
                 <input
                   type="file"
-                  accept="image/*"
+                  id="images"
                   multiple
-                  onChange={handleImageUpload}
-                  disabled={formData.imagens.length >= 5}
+                  accept="image/*"
+                  onChange={(e) => handleImageUpload(e.target.files)}
+                  className="hidden"
                 />
-                {compressionProgress !== null && (
-                  <div>Comprimindo imagem: {compressionProgress}%</div>
-                )}
                 <label htmlFor="images" className="cursor-pointer">
                   <Camera className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                   <p className="text-gray-500">Clique ou arraste imagem para inserir</p>
@@ -358,21 +343,16 @@ export default function CadastrarResiduoPage() {
                   ))}
                 </div>
               )}
-              {formData.imagens.length > 0 &&
-                formData.imagens.map((img) => (
-                  <div key={img.name}>{img.name}</div>
-                ))}
-              {formData.imagens.length}/5 imagens selecionadas
             </div>
 
             {/* Submit Button */}
             <div className="pt-6 flex justify-end">
               <button
                 type="submit"
-                disabled={!isFormValid() || saving}
+                disabled={!isFormValid()}
                 className="bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 text-white font-medium py-3 px-8 rounded-lg transition-colors duration-200"
               >
-                {saving ? "Cadastrando..." : "Ofertar"}
+                Ofertar
               </button>
             </div>
           </form>
