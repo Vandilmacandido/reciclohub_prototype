@@ -89,7 +89,7 @@ export default function MinhasOfertasPage() {
             >
               {/* Imagem do resíduo */}
               <div className="w-full h-40 bg-gray-200 flex items-center justify-center overflow-hidden rounded-t-2xl relative">
-                {offer.imagens && offer.imagens.length > 0 ? (
+                {offer.imagens && offer.imagens.length > 0 && typeof offer.imagens[0] === "string" && offer.imagens[0].startsWith("data:image") ? (
                   <Image
                     src={offer.imagens[0]}
                     alt="Resíduo"

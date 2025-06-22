@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { X, Camera } from "lucide-react"
+import { X, Camera, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 export default function CadastrarResiduoPage() {
@@ -16,8 +16,8 @@ export default function CadastrarResiduoPage() {
     preco: "",
     imagens: [] as File[],
   })
-
   const [dragActive, setDragActive] = useState(false)
+  const [isLoading, setIsLoading] = useState(false) // Novo estado de carregamento
 
   const tiposResiduos = [
     "Plástico PET",
@@ -86,8 +86,6 @@ export default function CadastrarResiduoPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    // Pega o userId do usuário logado (exemplo: salvo no localStorage)
     const userId = localStorage.getItem("userId")
     if (!userId) {
       alert("Usuário não autenticado. Faça login novamente.")
@@ -95,35 +93,41 @@ export default function CadastrarResiduoPage() {
       return
     }
 
-    // Faz upload das imagens (mock: salva apenas os nomes, para produção use Firebase Storage)
-    const imagensBase64: string[] = []
-    for (const file of formData.imagens) {
-      const base64 = await fileToBase64(file)
-      imagensBase64.push(base64)
-    }
+    setIsLoading(true) // Inicia o carregamento
 
-    const payload = {
-      ...formData,
-      imagens: imagensBase64,
-      userId,
-    }
+    try {
+      // Converte todas as imagens em paralelo
+      const imagensBase64: string[] = await Promise.all(
+        formData.imagens.map(fileToBase64)
+      )
 
-    const response = await fetch("/api/register-residues", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    })
+      const payload = {
+        ...formData,
+        imagens: imagensBase64,
+        userId,
+      }
 
-    if (response.ok) {
-      alert("Resíduo cadastrado com sucesso!")
-      router.push("/my-offers")
-    } else {
-      const error = await response.json()
-      alert(error.error || "Erro ao cadastrar resíduo.")
+      const response = await fetch("/api/register-residues", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+
+      if (response.ok) {
+        alert("Resíduo cadastrado com sucesso!")
+        router.push("/my-offers")
+      } else {
+        const error = await response.json()
+        alert(error.error || "Erro ao cadastrar resíduo.")
+      }
+    } catch {
+      alert("Erro ao processar imagens.")
+    } finally {
+      setIsLoading(false) // Finaliza o carregamento
     }
   }
 
-  // Função auxiliar para converter File em base64
+  // Função auxiliar para converter File em base64 (já está eficiente)
   function fileToBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
@@ -160,6 +164,13 @@ export default function CadastrarResiduoPage() {
         </div>
 
         <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
+          {/* Mostra animação de carregamento enquanto processa */}
+          {isLoading && (
+            <div className="absolute inset-0 bg-white bg-opacity-70 flex flex-col items-center justify-center z-50 rounded-lg">
+              <Loader2 className="animate-spin w-12 h-12 text-teal-600 mb-2" />
+              <span className="text-teal-700 font-medium">Processando imagens...</span>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Tipo de Resíduo */}
             <div className="space-y-2">
