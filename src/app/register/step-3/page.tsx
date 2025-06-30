@@ -1,8 +1,9 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { RotateCcw, ChevronLeft, Eye, EyeOff, Lock } from "lucide-react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
+import { FiLock as Lock, FiEye as Eye, FiEyeOff as EyeOff, FiChevronLeft as ChevronLeft } from "react-icons/fi"
 
 export default function RegisterStep3() {
   const router = useRouter()
@@ -57,30 +58,25 @@ export default function RegisterStep3() {
       try {
         // Pegue os dados das etapas anteriores
         const step1Data = JSON.parse(localStorage.getItem("registrationStep1") || "{}")
-        const step2Data = JSON.parse(localStorage.getItem("registrationStep2") || "{}")
         const completeRegistrationData = {
           ...step1Data,
-          ...step2Data,
+          ...JSON.parse(localStorage.getItem("registrationStep2") || "{}"),
           password: formData.password,
           acceptTerms: formData.acceptTerms,
           acceptPrivacy: formData.acceptPrivacy,
         }
 
         // Envie para a API de cadastro (register-user)
-        const response = await fetch("/api/register-user", {
+        const response = await fetch("/actions/api/user/register-industry", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(completeRegistrationData),
         })
 
         if (response.ok) {
-          // Simule login: salve um token fake
-          localStorage.setItem("authToken", "fake-token")
-          // Limpe os dados temporários
           localStorage.removeItem("registrationStep1")
           localStorage.removeItem("registrationStep2")
-          // Redirecione para o feed
-          router.replace("/feed")
+          router.replace("/register/success")
         } else {
           // Trate erro de cadastro
           const error = await response.json()
@@ -100,7 +96,18 @@ export default function RegisterStep3() {
   }
 
   const isFormValid = () => {
+    // Retrieve previous steps' data for validation
+    const step1Data = JSON.parse(localStorage.getItem("registrationStep1") || "{}")
+    const emailValid = typeof step1Data.email === "string" && step1Data.email.includes("@")
+    const cnpjNumbers = typeof step1Data.cnpj === "string" ? step1Data.cnpj.replace(/\D/g, "") : ""
+    const companyNameValid = typeof step1Data.companyName === "string" && step1Data.companyName.trim().length > 0
+    const telefoneValid = typeof step1Data.telefone === "string" && step1Data.telefone.trim().length > 0 // <-- aqui
+
     return (
+      companyNameValid &&
+      emailValid &&
+      cnpjNumbers.length === 14 &&
+      telefoneValid &&
       formData.password.length >= 8 &&
       formData.password === formData.confirmPassword &&
       formData.acceptTerms &&
@@ -114,13 +121,14 @@ export default function RegisterStep3() {
         {/* Logo */}
         <div className="text-center">
           <div className="flex items-center justify-center mb-4">
-            <h1 className="text-4xl md:text-5xl font-light text-teal-600 tracking-wide">
-              recicl
-              <span className="inline-flex items-center justify-center w-8 h-8 md:w-10 md:h-10 mx-1">
-                <RotateCcw className="w-6 h-6 md:w-8 md:h-8 text-teal-600" />
-              </span>
-              hub
-            </h1>
+            <Image
+              src="/RECICLOHUB_Green.png"
+              alt="RECICLOHUB Logo"
+              width={160}
+              height={80}
+              className="h-16 md:h-20 object-contain"
+              priority
+            />
           </div>
           <h2 className="text-xl font-medium text-teal-600 mb-2">CADASTRO</h2>
           <div className="flex items-center justify-center space-x-2 mb-4">

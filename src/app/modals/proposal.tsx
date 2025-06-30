@@ -13,11 +13,10 @@ interface Offer {
 interface ProposalModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: () => void
   offer: Offer | null
 }
 
-export function ProposalModal({ isOpen, onClose, onSubmit, offer }: ProposalModalProps) {
+export function ProposalModal({ isOpen, onClose, offer }: ProposalModalProps) {
   const [formData, setFormData] = useState({
     quantity: "",
     frequency: "",
@@ -29,14 +28,61 @@ export function ProposalModal({ isOpen, onClose, onSubmit, offer }: ProposalModa
 
   if (!isOpen || !offer) return null
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit()
-    setSuccess(true)
-    setTimeout(() => {
-      setSuccess(false)
-      onClose()
-    }, 1800)
+    
+    // Validação básica
+    if (!formData.quantity || !formData.frequency || !formData.transportType) {
+      alert("Por favor, preencha todos os campos obrigatórios")
+      return
+    }
+
+    try {
+      const empresaId = localStorage.getItem("empresaId")
+      if (!empresaId) {
+        alert("Erro: usuário não autenticado")
+        return
+      }
+
+      const response = await fetch("/actions/api/proposals/make-proposal", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          residuoId: offer.id,
+          empresaProponenteId: parseInt(empresaId),
+          quantidade: formData.quantity,
+          frequencia: formData.frequency,
+          preco: formData.price,
+          mensagem: formData.message,
+          tipoTransporte: formData.transportType
+        })
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        setSuccess(true)
+        setTimeout(() => {
+          setSuccess(false)
+          onClose()
+          // Reset form
+          setFormData({
+            quantity: "",
+            frequency: "",
+            price: "",
+            message: "",
+            transportType: "",
+          })
+        }, 1800)
+      } else {
+        alert(result.error || "Erro ao enviar proposta")
+      }
+    } catch (error) {
+      console.error("Erro ao enviar proposta:", error)
+      alert("Erro ao enviar proposta. Tente novamente.")
+    }
   }
 
   const handleInputChange = (field: string, value: string) => {

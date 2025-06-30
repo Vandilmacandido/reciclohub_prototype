@@ -11,72 +11,48 @@ export default function Home() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [keepLoggedIn, setKeepLoggedIn] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
-    // Se já estiver logado, redireciona para o feed
     if (typeof window !== "undefined" && localStorage.getItem("token")) {
       router.replace("/feed")
     }
   }, [router])
 
-  // Função para verificar matches não notificados
-  interface Proposal {
-    id: string
-    matchId: string
-    companyName?: string
-    notifiedUserIds?: string[]
-    [key: string]: unknown
-  }
-
-  const checkForMatches = async (userId: string) => {
-    try {
-      const res = await fetch(`/api/proposals-accepted?userId=${userId}`)
-      const data: Proposal[] = await res.json()
-      
-      const notNotified = data.find(
-        (proposal) =>
-          !proposal.notifiedUserIds || !proposal.notifiedUserIds.includes(userId)
-      )
-
-      if (notNotified) {
-        // Salva no localStorage para o MatchModalContainer detectar
-        localStorage.setItem("pendingMatch", JSON.stringify({
-          id: notNotified.id,
-          matchId: notNotified.matchId,
-          company: notNotified.companyName || "Empresa Desconhecida"
-        }))
-      }
-    } catch (error) {
-      console.error("Erro ao verificar matches:", error)
-    }
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
+    setLoading(true)
 
-    // Consulta o usuário pelo email
-    const res = await fetch(`/api/consult-user?email=${encodeURIComponent(email)}`)
-    const users = await res.json()
+    try {
+      const res = await fetch("/actions/api/user/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      })
 
-    if (users.length === 0) {
-      alert("Usuário não encontrado. Cadastre-se para acessar a plataforma.")
-      return
-    }
+      const data = await res.json()
 
-    // Verifica a senha (atenção: senha em texto puro, apenas para protótipo)
-    const user = users[0]
-    if (user && user.password === password) {
+      if (!res.ok) {
+        setError(data.error || "Erro ao realizar login.")
+        setLoading(false)
+        return
+      }
+
+      // Salva dados essenciais no localStorage
       localStorage.setItem("token", "fake-token")
-      localStorage.setItem("user", JSON.stringify({ id: user.id, email: user.email }))
-      localStorage.setItem("userId", user.id)
-      
-      // Verifica matches pendentes antes de redirecionar
-      await checkForMatches(user.id)
-      
+      localStorage.setItem("user", JSON.stringify({ id: data.id, email: data.email, nome: data.nome }))
+      localStorage.setItem("userId", data.id) // id do usuário
+      localStorage.setItem("empresaId", data.empresaId) // id da empresa/indústria
+
+      // Redireciona para o feed
       router.replace("/feed")
-    } else {
-      alert("Senha incorreta.")
+    } catch {
+      setError("Erro ao conectar com o servidor.")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -86,7 +62,6 @@ export default function Home() {
         {/* Logo */}
         <div className="text-center">
           <div className="flex items-center justify-center mb-8">
-            {/* Imagem do logo */}
             <Image
               src="/RECICLOHUB_Green.png"
               alt="RECICLOHUB_Green"
@@ -112,6 +87,7 @@ export default function Home() {
               className="w-full px-4 py-3 border-2 border-teal-400 rounded-lg focus:border-teal-600 focus:ring-0 bg-white text-gray-900 placeholder-gray-400"
               placeholder="Digite seu email"
               required
+              autoComplete="username"
             />
           </div>
 
@@ -129,6 +105,7 @@ export default function Home() {
                 className="w-full px-4 py-3 pr-12 border-2 border-teal-400 rounded-lg focus:border-teal-600 focus:ring-0 bg-white text-gray-900 placeholder-gray-400"
                 placeholder="Digite sua senha"
                 required
+                autoComplete="current-password"
               />
               <button
                 type="button"
@@ -140,6 +117,11 @@ export default function Home() {
               </button>
             </div>
           </div>
+
+          {/* Error message */}
+          {error && (
+            <div className="text-red-600 text-sm text-center">{error}</div>
+          )}
 
           {/* Keep logged in and Forgot password */}
           <div className="flex items-center justify-between">
@@ -167,8 +149,9 @@ export default function Home() {
           <button
             type="submit"
             className="w-full bg-teal-600 hover:bg-teal-700 hover:cursor-pointer text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 text-base"
+            disabled={loading}
           >
-            Entrar
+            {loading ? "Entrando..." : "Entrar"}
           </button>
         </form>
 

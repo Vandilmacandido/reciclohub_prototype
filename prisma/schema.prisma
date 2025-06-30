@@ -1,0 +1,119 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Residuos {
+  id              Int              @id @default(autoincrement())
+  tipoResiduo     String
+  descricao       String
+  quantidade      Float
+  unidade         String
+  condicoes       String
+  disponibilidade String
+  preco           String?
+  empresaId       Int
+  userId          String
+  imagens         ImagemResiduos[] // Relacionamento 1-N com imagens
+  propostas       Propostas[]      // Relacionamento 1-N com propostas
+
+  empresa Empresas @relation(fields: [empresaId], references: [id])
+
+  @@map("residuos")
+}
+
+model ImagemResiduos {
+  id        Int      @id @default(autoincrement())
+  url       String   @db.Text
+  residuoId Int
+  residuo   Residuos @relation(fields: [residuoId], references: [id])
+
+  @@map("imagens_residuos")
+}
+
+model Empresas {
+  id                Int     @id @default(autoincrement())
+  nome              String
+  email             String  @unique
+  telefone          String
+  password          String
+  cnpj              String  @unique
+  rua               String
+  numero            String
+  cep               String
+  cidade            String
+  estado            String
+  pais              String
+  aceiteTermos      Boolean
+  aceitePrivacidade Boolean
+
+  residuos Residuos[]
+  propostasEnviadas Propostas[] @relation("EmpresaProponente")
+  propostasRecebidas Propostas[] @relation("EmpresaReceptora")
+  notificacoes Notificacoes[]
+
+  @@map("empresas")
+}
+
+model Propostas {
+  id               Int      @id @default(autoincrement())
+  quantidade       String
+  frequencia       String
+  preco           String?
+  mensagem        String?
+  tipoTransporte  String
+  status          StatusProposta @default(PENDENTE)
+  criadaEm        DateTime @default(now())
+  atualizadaEm    DateTime @updatedAt
+  
+  // Relacionamentos
+  residuoId       Int
+  empresaProponenteId Int
+  empresaReceptoraId  Int
+  
+  residuo         Residuos @relation(fields: [residuoId], references: [id], onDelete: Cascade)
+  empresaProponente Empresas @relation("EmpresaProponente", fields: [empresaProponenteId], references: [id])
+  empresaReceptora  Empresas @relation("EmpresaReceptora", fields: [empresaReceptoraId], references: [id])
+  
+  notificacoes Notificacoes[]
+
+  @@map("propostas")
+}
+
+model Notificacoes {
+  id          Int      @id @default(autoincrement())
+  tipo        TipoNotificacao
+  titulo      String
+  mensagem    String
+  visualizada Boolean  @default(false)
+  criadaEm    DateTime @default(now())
+  
+  // Relacionamentos
+  empresaId   Int
+  propostaId  Int?
+  
+  empresa     Empresas @relation(fields: [empresaId], references: [id])
+  proposta    Propostas? @relation(fields: [propostaId], references: [id], onDelete: Cascade)
+
+  @@map("notificacoes")
+}
+
+enum StatusProposta {
+  PENDENTE
+  ACEITA
+  REJEITADA
+  CANCELADA
+}
+
+enum TipoNotificacao {
+  NOVA_PROPOSTA
+  PROPOSTA_ACEITA
+  PROPOSTA_REJEITADA
+  MATCH_CONFIRMADO
+}

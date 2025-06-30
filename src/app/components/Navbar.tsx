@@ -9,7 +9,7 @@ const navItems = [
   { label: "Feed", href: "/feed" },
   { label: "Meus resíduos", href: "/my-offers" },
   { label: "Registrar resíduo", href: "/residues/register" },
-  { label: "Propostas Recebidas", href: "/my-offers/proposals-received" },
+  { label: "Propostas Recebidas", href: "/proposals/received" },
   { label: "Negociação", href: "/chat" },
 ]
 

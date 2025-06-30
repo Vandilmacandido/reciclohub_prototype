@@ -31,7 +31,7 @@ export default function RegisterSuccess() {
         </div>
         <div className="pt-8 flex flex-col items-center">
           <Link
-            href="/login"
+            href="/"
             className="w-full bg-teal-600 hover:bg-teal-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 text-base text-center"
           >
             Fazer login

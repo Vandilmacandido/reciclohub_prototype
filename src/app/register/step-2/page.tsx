@@ -1,17 +1,19 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { RotateCcw, ChevronLeft, MapPin } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
+import { MapPin, ChevronLeft } from "lucide-react"
 
 export default function RegisterStep2() {
   const router = useRouter()
   const [formData, setFormData] = useState({
     cep: "",
     street: "",
+    numero: "",
     city: "",
-    state: "Pernambuco", // Corrigido aqui
+    state: "Pernambuco",
     country: "Brasil",
   })
 
@@ -78,6 +80,9 @@ export default function RegisterStep2() {
     if (!formData.state) {
       newErrors.state = "Estado é obrigatório"
     }
+    if (!formData.numero.trim()) {
+      newErrors.numero = "Número é obrigatório"
+    }
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -96,7 +101,8 @@ export default function RegisterStep2() {
       formData.street.trim() &&
       formData.city.trim() &&
       formData.state &&
-      formData.country.trim()
+      formData.country.trim() &&
+      formData.numero.trim()
     )
   }
 
@@ -106,13 +112,14 @@ export default function RegisterStep2() {
         {/* Logo */}
         <div className="text-center">
           <div className="flex items-center justify-center mb-4">
-            <h1 className="text-4xl md:text-5xl font-light text-teal-600 tracking-wide">
-              recicl
-              <span className="inline-flex items-center justify-center w-8 h-8 md:w-10 md:h-10 mx-1">
-                <RotateCcw className="w-6 h-6 md:w-8 md:h-8 text-teal-600" />
-              </span>
-              hub
-            </h1>
+            <Image
+              src="/RECICLOHUB_Green.png"
+              alt="RECICLOHUB Logo"
+              width={160}
+              height={80}
+              className="h-16 md:h-20 object-contain"
+              priority
+            />
           </div>
           <h2 className="text-xl font-medium text-teal-600 mb-2">CADASTRO</h2>
           <div className="flex items-center justify-center space-x-2 mb-4">
@@ -167,6 +174,25 @@ export default function RegisterStep2() {
                 placeholder="Rua, Avenida..."
               />
               {errors.street && <p className="text-red-500 text-xs">{errors.street}</p>}
+            </div>
+
+            {/* Número */}
+            <div className="space-y-2">
+              <label htmlFor="numero" className="text-teal-600 font-medium text-sm">
+                Número *
+              </label>
+              <input
+                id="numero"
+                type="text"
+                value={formData.numero}
+                onChange={(e) => handleInputChange("numero", e.target.value)}
+                className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-0 bg-white text-gray-900 placeholder-gray-400 ${
+                  errors.numero ? "border-red-400 focus:border-red-600" : "border-teal-400 focus:border-teal-600"
+                }`}
+                placeholder="Número"
+                required
+              />
+              {errors.numero && <p className="text-red-500 text-xs">{errors.numero}</p>}
             </div>
 
             {/* City and State */}
