@@ -8,8 +8,9 @@ interface ResidueFormData {
   unidade: string
   preco: string
   tipoResiduo: string
+  condicoes: string
+  disponibilidade: string
   imagens?: string[]
-  // Adicione outros campos conforme necessário
 }
 
 export default function EditResiduePage() {
@@ -24,7 +25,7 @@ export default function EditResiduePage() {
 
   useEffect(() => {
     // Buscar dados do resíduo pelo id
-    fetch(`/api/consult-residue?id=${id}`)
+    fetch(`/actions/api/residues/consult-residue?id=${id}`)
       .then(res => res.json())
       .then(data => {
         setFormData({
@@ -33,6 +34,8 @@ export default function EditResiduePage() {
           unidade: data.unidade || "",
           preco: data.preco || "",
           tipoResiduo: data.tipoResiduo || "",
+          condicoes: data.condicoes || "",
+          disponibilidade: data.disponibilidade || "",
           imagens: data.imagens || [],
         })
         setLoading(false)
@@ -60,7 +63,7 @@ export default function EditResiduePage() {
     }
     const updateData = { ...formData }
     try {
-      const res = await fetch("/api/edit-residues", {
+      const res = await fetch("/actions/api/residues/edit-residues", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ residueId: id, userId, updateData }),
@@ -88,12 +91,22 @@ export default function EditResiduePage() {
         <h1 className="text-2xl font-bold text-gray-900 mb-6">Editar Resíduo</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Resíduo</label>
             <input
               type="text"
+              value={formData.tipoResiduo}
+              onChange={e => handleChange("tipoResiduo", e.target.value)}
+              className="w-full px-4 py-3 border-2 border-teal-400 rounded-lg focus:border-teal-600 focus:ring-0 bg-white text-gray-900 placeholder-gray-400"
+              placeholder="Tipo de resíduo"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+            <textarea
               value={formData.descricao}
               onChange={e => handleChange("descricao", e.target.value)}
-              className="w-full px-4 py-3 border-2 border-teal-400 rounded-lg focus:border-teal-600 focus:ring-0 bg-white text-gray-900 placeholder-gray-400"
+              className="w-full px-4 py-3 border-2 border-teal-400 rounded-lg focus:border-teal-600 focus:ring-0 bg-white text-gray-900 placeholder-gray-400 h-24 resize-none"
               placeholder="Descrição do resíduo"
               required
             />
@@ -122,6 +135,30 @@ export default function EditResiduePage() {
             />
           </div>
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Condições</label>
+            <textarea
+              value={formData.condicoes}
+              onChange={e => handleChange("condicoes", e.target.value)}
+              className="w-full px-4 py-3 border-2 border-teal-400 rounded-lg focus:border-teal-600 focus:ring-0 bg-white text-gray-900 placeholder-gray-400 h-20 resize-none"
+              placeholder="Condições de armazenamento"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Disponibilidade</label>
+            <select
+              value={formData.disponibilidade}
+              onChange={e => handleChange("disponibilidade", e.target.value)}
+              className="w-full px-4 py-3 border-2 border-teal-400 rounded-lg focus:border-teal-600 focus:ring-0 bg-white text-gray-900"
+              required
+            >
+              <option value="">Selecione</option>
+              <option value="venda">Venda</option>
+              <option value="doacao">Doação</option>
+              <option value="retirada">Retirada</option>
+            </select>
+          </div>
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Preço</label>
             <input
               type="text"
@@ -129,21 +166,9 @@ export default function EditResiduePage() {
               onChange={e => handleChange("preco", e.target.value)}
               className="w-full px-4 py-3 border-2 border-teal-400 rounded-lg focus:border-teal-600 focus:ring-0 bg-white text-gray-900 placeholder-gray-400"
               placeholder="Ex: R$ 1,80/kg"
-              required
+              disabled={formData.disponibilidade !== "venda"}
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Resíduo</label>
-            <input
-              type="text"
-              value={formData.tipoResiduo}
-              onChange={e => handleChange("tipoResiduo", e.target.value)}
-              className="w-full px-4 py-3 border-2 border-teal-400 rounded-lg focus:border-teal-600 focus:ring-0 bg-white text-gray-900 placeholder-gray-400"
-              placeholder="Tipo de resíduo"
-              required
-            />
-          </div>
-          {/* Adicione campos para imagens ou outros campos se necessário */}
           <button
             type="submit"
             disabled={saving}

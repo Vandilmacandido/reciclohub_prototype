@@ -183,15 +183,26 @@ export class ResiduoService {
     condicoes: string
     disponibilidade: string
     preco?: string
-    imagens: string[]
+    imagens: File[]
     empresaId: number
     userId: string
   }) {
     try {
+      const formData = new FormData();
+      formData.append("tipoResiduo", data.tipoResiduo);
+      formData.append("descricao", data.descricao);
+      formData.append("quantidade", data.quantidade);
+      formData.append("unidade", data.unidade);
+      formData.append("condicoes", data.condicoes);
+      formData.append("disponibilidade", data.disponibilidade);
+      if (data.preco) formData.append("preco", data.preco);
+      formData.append("empresaId", data.empresaId.toString());
+      formData.append("userId", data.userId);
+      data.imagens.forEach((file) => formData.append("imagens", file));
+
       const response = await fetch(`${this.baseUrl}/register-residues`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: formData
       })
       
       if (!response.ok) {

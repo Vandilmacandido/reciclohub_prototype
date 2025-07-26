@@ -30,7 +30,7 @@ model Residuos {
 
 model ImagemResiduos {
   id        Int      @id @default(autoincrement())
-  url       String   @db.Text
+  url       String   // Agora armazena apenas a URL pública do S3
   residuoId Int
   residuo   Residuos @relation(fields: [residuoId], references: [id])
 

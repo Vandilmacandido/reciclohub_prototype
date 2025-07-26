@@ -22,23 +22,43 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "empresaId deve ser um número válido" }, { status: 400 })
     }
 
-    // Buscar resíduos da empresa específica, incluindo as imagens
+    // Buscar resíduos da empresa específica, incluindo as imagens e propostas
     const residuos = await prisma.residuos.findMany({
       where: {
         empresaId: empresaIdNumber
       },
       include: {
-        imagens: true,
+        imagens: {
+          select: {
+            id: true,
+            url: true,
+          },
+          orderBy: {
+            id: 'asc' // Garantir ordem consistente
+          }
+        },
         empresa: {
           select: {
             nome: true
           }
+        },
+        propostas: {
+          select: {
+            id: true,
+            status: true
+          }
         }
       },
       orderBy: {
-        id: 'desc' // Mais recentes primeiro
+        id: 'desc'
       }
     })
+
+    // Função para processar URLs de imagem
+    const processImageUrl = (url: string): string => {
+      // Agora a url já é pública do S3, só retorna
+      return url;
+    };
 
     // Formatar os dados para o frontend
     const residuosFormatados = residuos.map(residuo => ({
@@ -53,10 +73,21 @@ export async function GET(req: Request) {
       empresaId: residuo.empresaId,
       userId: residuo.userId,
       empresa: residuo.empresa.nome,
-      imagens: residuo.imagens.map(img => img.url)
+      imagens: residuo.imagens
+        .map((imagem) => ({
+          id: imagem.id,
+          url: processImageUrl(imagem.url),
+        })),
+      propostas: residuo.propostas.length,
+      propostasPendentes: residuo.propostas.filter(p => p.status === 'PENDENTE').length
     }))
 
-    return NextResponse.json(residuosFormatados, { status: 200 })
+    console.log(`✅ Retornando ${residuosFormatados.length} resíduos formatados`);
+
+    return NextResponse.json({
+      success: true,
+      data: residuosFormatados,
+    }, { status: 200 })
   } catch (error) {
     console.error("Erro ao buscar resíduos da empresa:", error)
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 })

@@ -85,85 +85,81 @@ export function MatchModal({ isOpen, onClose, offer }: MatchModalProps) {
 export function MatchModalContainer() {
   const [showMatchModal, setShowMatchModal] = useState(false)
   const [matchedOffer, setMatchedOffer] = useState<Offer | null>(null)
-  const [userId, setUserId] = useState<string | null>(null)
+  const [empresaId, setEmpresaId] = useState<number | null>(null)
+
+  // Função para buscar e exibir match imediatamente
+  const checkAndShowMatch = async () => {
+    const empresaIdStr = localStorage.getItem("empresaId")
+    if (!empresaIdStr) return
+    const empresaIdNum = parseInt(empresaIdStr)
+    setEmpresaId(empresaIdNum)
+    try {
+      const res = await fetch(`/api/proposals-accepted?empresaId=${empresaIdNum}`)
+      const data: Array<{
+        id: string
+        residueData?: { companyName?: string }
+        notifiedEmpresaIds?: number[]
+      }> = await res.json()
+      const notNotified = data.find(
+        (proposal) =>
+          !proposal.notifiedEmpresaIds || !proposal.notifiedEmpresaIds.includes(empresaIdNum)
+      )
+      if (notNotified) {
+        setMatchedOffer({
+          id: notNotified.id,
+          company: notNotified.residueData?.companyName || "Empresa",
+          matchId: notNotified.id,
+        })
+        setShowMatchModal(true)
+      } else {
+        setMatchedOffer(null)
+        setShowMatchModal(false)
+      }
+    } catch {
+      setMatchedOffer(null)
+      setShowMatchModal(false)
+    }
+  }
 
   useEffect(() => {
-    // Verifica se há match pendente do login
-    const checkPendingMatch = () => {
-      const pendingMatch = localStorage.getItem("pendingMatch")
-      if (pendingMatch) {
-        try {
-          const matchData = JSON.parse(pendingMatch)
-          setMatchedOffer(matchData)
-          setShowMatchModal(true)
-
-          // Remove do localStorage após exibir
-          localStorage.removeItem("pendingMatch")
-
-          // Marca como notificado no backend
-          const user = localStorage.getItem("user")
-          if (user) {
-            const userData = JSON.parse(user)
-            setUserId(userData.id)
-            fetch("/api/proposal-match-unique", {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                proposalId: matchData.id,
-                userId: userData.id,
-              }),
-            })
-          }
-        } catch (error) {
-          console.error("Erro ao processar match pendente:", error)
-          localStorage.removeItem("pendingMatch")
-        }
-      }
-    }
-
-    // Verifica imediatamente
-    checkPendingMatch()
-
-    // Escuta mudanças no localStorage (para quando fizer login)
-    const handleStorageChange = () => {
-      checkPendingMatch()
-    }
-
-    window.addEventListener("storage", handleStorageChange)
-
+    // Verifica imediatamente ao montar
+    checkAndShowMatch()
+    // Escuta evento customizado para checar match após aceite
+    const handler = () => checkAndShowMatch()
+    window.addEventListener('check-match-modal', handler)
     return () => {
-      window.removeEventListener("storage", handleStorageChange)
+      window.removeEventListener('check-match-modal', handler)
     }
   }, [])
 
   useEffect(() => {
-    if (showMatchModal && matchedOffer && userId) {
+    if (showMatchModal && matchedOffer && empresaId) {
       fetch("/api/proposal-match-unique", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ proposalId: matchedOffer.id, userId }),
+        body: JSON.stringify({ proposalId: matchedOffer.id, empresaId }),
       })
     }
-  }, [showMatchModal, matchedOffer, userId])
+  }, [showMatchModal, matchedOffer, empresaId])
 
   useEffect(() => {
-    // Busca matches aceitos e não notificados para o usuário logado
+    // Busca matches aceitos e não notificados para a empresa logada
     const fetchPendingMatch = async () => {
-      const user = localStorage.getItem("user")
-      if (!user) return
-      const userData = JSON.parse(user)
-      setUserId(userData.id)
+      const empresaIdStr = localStorage.getItem("empresaId")
+      if (!empresaIdStr) return
+      const empresaIdNum = parseInt(empresaIdStr)
+      setEmpresaId(empresaIdNum)
       try {
-        const res = await fetch(`/api/proposals-accepted?userId=${userData.id}`)
+        const res = await fetch(`/api/proposals-accepted?empresaId=${empresaIdNum}`)
         const data: Array<{
           id: string
           residueData?: { companyName?: string }
-          notifiedUserIds?: string[]
+          notifiedEmpresaIds?: number[]
         }> = await res.json()
         // Encontra o primeiro match não notificado
         const notNotified = data.find(
           (proposal) =>
-            !proposal.notifiedUserIds || !proposal.notifiedUserIds.includes(userData.id)
+            !proposal.notifiedEmpresaIds || !proposal.notifiedEmpresaIds.includes(empresaIdNum)
         )
         if (notNotified) {
           setMatchedOffer({
@@ -172,9 +168,15 @@ export function MatchModalContainer() {
             matchId: notNotified.id,
           })
           setShowMatchModal(true)
+        } else {
+          // Não há match não visualizado, não exibe modal
+          setMatchedOffer(null)
+          setShowMatchModal(false)
         }
       } catch {
         // Silencie erros para não travar a experiência do usuário
+        setMatchedOffer(null)
+        setShowMatchModal(false)
       }
     }
 
@@ -182,6 +184,14 @@ export function MatchModalContainer() {
   }, [])
 
   const handleCloseModal = () => {
+    // Marca como visualizada ao fechar o modal
+    if (matchedOffer && empresaId) {
+      fetch("/api/proposal-match-unique", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ proposalId: matchedOffer.id, empresaId }),
+      })
+    }
     setShowMatchModal(false)
     setMatchedOffer(null)
   }

@@ -18,6 +18,8 @@ export default function CadastrarResiduoPage() {
   })
   const [dragActive, setDragActive] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [processingImages, setProcessingImages] = useState(false)
+  const [imageProcessingProgress, setImageProcessingProgress] = useState({ current: 0, total: 0 })
 
   const tiposResiduos = [
     "Plástico PET",
@@ -50,13 +52,49 @@ export default function CadastrarResiduoPage() {
     setResiduoData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleImageUpload = (files: FileList | null) => {
-    if (files) {
-      const newImages = Array.from(files).slice(0, 5 - residuoData.imagens.length)
-      setResiduoData((prev) => ({
-        ...prev,
-        imagens: [...prev.imagens, ...newImages].slice(0, 5),
-      }))
+  const handleImageUpload = async (files: FileList | null) => {
+    if (files && files.length > 0) {
+      const filesArray = Array.from(files)
+      const availableSlots = 5 - residuoData.imagens.length
+      const filesToProcess = filesArray.slice(0, availableSlots)
+      
+      if (filesToProcess.length === 0) return
+      
+      setProcessingImages(true)
+      setImageProcessingProgress({ current: 0, total: filesToProcess.length })
+      
+      const processedImages: File[] = []
+      
+      for (let i = 0; i < filesToProcess.length; i++) {
+        const file = filesToProcess[i]
+        setImageProcessingProgress({ current: i + 1, total: filesToProcess.length })
+        
+        // Verificar se é uma imagem
+        if (!file.type.startsWith('image/')) {
+          alert(`Arquivo "${file.name}" não é uma imagem válida`)
+          continue
+        }
+        
+        try {
+          // Processar a imagem (otimizar/comprimir se necessário)
+          const processedFile = await optimizeImage(file)
+          processedImages.push(processedFile)
+        } catch (error) {
+          console.error(`Erro ao processar imagem ${file.name}:`, error)
+          alert(`Erro ao processar a imagem "${file.name}"`)
+        }
+      }
+      
+      setProcessingImages(false)
+      setImageProcessingProgress({ current: 0, total: 0 })
+      
+      // Adicionar as imagens processadas
+      if (processedImages.length > 0) {
+        setResiduoData((prev) => ({
+          ...prev,
+          imagens: [...prev.imagens, ...processedImages],
+        }))
+      }
     }
   }
 
@@ -84,173 +122,160 @@ export default function CadastrarResiduoPage() {
     }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const userId = localStorage.getItem("userId")
-    const empresaId = localStorage.getItem("empresaId")
-    if (!userId || !empresaId) {
-      alert("Usuário ou empresa não autenticados. Faça login novamente.")
-      router.push("/")
-      return
-    }
-
-    if (residuoData.imagens.length === 0) {
-      alert("Adicione pelo menos 1 imagem do resíduo.")
-      return
-    }
-
-    setIsLoading(true)
-
-    try {
-      // Converte todas as imagens em base64
-      console.log("=== FRONTEND DEBUG - CONVERSÃO DE IMAGENS ===")
-      console.log("Número de imagens a converter:", residuoData.imagens.length)
-      console.log("Tipos dos arquivos:", residuoData.imagens.map(img => img.type))
-      console.log("Tamanhos dos arquivos:", residuoData.imagens.map(img => img.size))
-      
-      const imagensBase64: string[] = await Promise.all(
-        residuoData.imagens.map((file, index) => {
-          console.log(`Convertendo arquivo ${index + 1}:`, file.name, file.type, file.size)
-          return fileToBase64(file)
-        })
-      )
-      
-      console.log("=== RESULTADO DA CONVERSÃO ===")
-      console.log("Número de imagens convertidas:", imagensBase64.length)
-      console.log("Tamanhos das strings base64:", imagensBase64.map(img => img.length))
-      console.log("Primeiros chars de cada imagem:", imagensBase64.map(img => img.substring(0, 50)))
-      
-      const payload = {
-        tipoResiduo: residuoData.tipoResiduo,
-        descricao: residuoData.descricao,
-        quantidade: residuoData.quantidade,
-        unidade: residuoData.unidade,
-        condicoes: residuoData.condicoes,
-        disponibilidade: residuoData.disponibilidade,
-        preco: residuoData.preco,
-        imagens: imagensBase64,
-        empresaId: Number(empresaId),
-        userId,
-      }
-
-      console.log("=== PAYLOAD FINAL ===")
-      console.log("Payload completo (sem imagens):", { ...payload, imagens: `[${payload.imagens.length} imagens]` })
-      console.log("Tipo do campo imagens:", typeof payload.imagens)
-      console.log("É array?:", Array.isArray(payload.imagens))
-      console.log("Primeira imagem no payload:", payload.imagens[0]?.substring(0, 100))
-
-      const response = await fetch("/actions/api/residues/register-residues", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
-
-      console.log("=== RESPOSTA DO SERVIDOR ===")
-      console.log("Status da resposta:", response.status)
-      console.log("Headers da resposta:", response.headers)
-
-      if (response.ok) {
-        const residuo = await response.json()
-        console.log("Resposta do servidor:", residuo)
-        alert(`Resíduo cadastrado com sucesso! ${residuo.imagensCreated || 0} imagens foram salvas.`)
-        router.push("/my-offers")
-      } else {
-        const error = await response.json()
-        console.error("Erro do servidor:", error)
-        alert(error.error || "Erro ao cadastrar resíduo.")
-      }
-    } catch {
-      alert("Erro ao processar imagens.")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  function fileToBase64(file: File): Promise<string> {
+  // Função para otimizar imagens automaticamente
+  const optimizeImage = (file: File): Promise<File> => {
     return new Promise((resolve, reject) => {
-      console.log(`Convertendo arquivo: ${file.name}, tipo: ${file.type}, tamanho: ${file.size}`)
-      
-      // Se a imagem for muito grande, vamos comprimí-la
-      if (file.size > 500000) { // 500KB
-        compressImage(file).then(compressedFile => {
-          const reader = new FileReader()
-          reader.onload = () => {
-            const result = reader.result as string
-            console.log(`Conversão concluída (comprimida). Tamanho do base64: ${result.length}`)
-            console.log(`Primeiros 100 chars: ${result.substring(0, 100)}`)
-            resolve(result)
-          }
-          reader.onerror = (error) => {
-            console.error("Erro na conversão de base64:", error)
-            reject(error)
-          }
-          reader.readAsDataURL(compressedFile)
-        })
-      } else {
-        const reader = new FileReader()
-        reader.onload = () => {
-          const result = reader.result as string
-          console.log(`Conversão concluída. Tamanho do base64: ${result.length}`)
-          console.log(`Primeiros 100 chars: ${result.substring(0, 100)}`)
-          resolve(result)
-        }
-        reader.onerror = (error) => {
-          console.error("Erro na conversão de base64:", error)
-          reject(error)
-        }
-        reader.readAsDataURL(file)
+      // Validar tipo de arquivo primeiro
+      if (!file.type.startsWith('image/')) {
+        reject(new Error('Arquivo não é uma imagem válida'))
+        return
       }
-    })
-  }
 
-  function compressImage(file: File): Promise<File> {
-    return new Promise((resolve) => {
       const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')!
+      const ctx = canvas.getContext('2d')
       const img = new Image()
       
       img.onload = () => {
-        // Redimensionar para no máximo 800x600 mantendo proporção
-        const maxWidth = 800
-        const maxHeight = 600
-        let { width, height } = img
-        
-        if (width > height) {
-          if (width > maxWidth) {
-            height = (height * maxWidth) / width
-            width = maxWidth
+        try {
+          // Definir dimensões máximas para manter qualidade
+          const MAX_WIDTH = 1920
+          const MAX_HEIGHT = 1080
+          const MAX_FILE_SIZE = 500 * 1024 * 1024 // 500MB alvo (aumentado)
+          
+          let { width, height } = img
+          
+          // Redimensionar se necessário, mantendo proporção
+          if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+            const ratio = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height)
+            width = Math.round(width * ratio)
+            height = Math.round(height * ratio)
           }
-        } else {
-          if (height > maxHeight) {
-            width = (width * maxHeight) / height
-            height = maxHeight
+          
+          canvas.width = width
+          canvas.height = height
+          
+          // Desenhar imagem redimensionada
+          ctx?.drawImage(img, 0, 0, width, height)
+          
+          // Função para tentar diferentes qualidades
+          const tryQuality = (quality: number) => {
+            canvas.toBlob((blob) => {
+              if (blob) {
+                // Se o arquivo resultante é pequeno o suficiente ou qualidade já está muito baixa
+                if (blob.size <= MAX_FILE_SIZE || quality <= 0.1) {
+                  const optimizedFile = new File([blob], file.name, {
+                    type: 'image/jpeg',
+                    lastModified: Date.now()
+                  })
+                  
+                  console.log(`Imagem otimizada: ${file.name}`)
+                  console.log(`Tamanho original: ${(file.size / (1024 * 1024)).toFixed(2)}MB`)
+                  console.log(`Tamanho otimizado: ${(blob.size / (1024 * 1024)).toFixed(2)}MB`)
+                  console.log(`Dimensões: ${width}x${height}`)
+                  console.log(`Qualidade: ${Math.round(quality * 100)}%`)
+                  
+                  resolve(optimizedFile)
+                } else {
+                  // Tentar com qualidade menor
+                  tryQuality(Math.max(quality - 0.1, 0.1))
+                }
+              } else {
+                reject(new Error('Erro ao processar imagem'))
+              }
+            }, 'image/jpeg', quality)
           }
+          
+          // Começar com qualidade baseada no tamanho original
+          const initialQuality = file.size > 100 * 1024 * 1024 ? 0.6 : file.size > 20 * 1024 * 1024 ? 0.7 : 0.8
+          tryQuality(initialQuality)
+        } catch (error) {
+          console.error('Erro no processamento da imagem:', error)
+          reject(new Error('Erro ao processar imagem'))
         }
-        
-        canvas.width = width
-        canvas.height = height
-        
-        // Desenhar imagem redimensionada
-        ctx.drawImage(img, 0, 0, width, height)
-        
-        // Converter para blob com qualidade reduzida
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const compressedFile = new File([blob], file.name, {
-              type: 'image/jpeg',
-              lastModified: Date.now()
-            })
-            console.log(`Imagem comprimida: ${file.size} -> ${compressedFile.size}`)
-            resolve(compressedFile)
-          } else {
-            resolve(file) // fallback
-          }
-        }, 'image/jpeg', 0.7) // 70% de qualidade
       }
       
-      img.src = URL.createObjectURL(file)
+      img.onerror = () => reject(new Error('Erro ao carregar imagem'))
+      
+      // Criar URL do objeto de forma segura
+      try {
+        img.src = URL.createObjectURL(file)
+      } catch {
+        reject(new Error('Erro ao criar URL da imagem'))
+      }
     })
   }
+
+
+  // fileToBase64 removido: não é mais necessário
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const userId = localStorage.getItem("userId");
+    const empresaId = localStorage.getItem("empresaId");
+    if (!userId || !empresaId) {
+      alert("Usuário ou empresa não autenticados. Faça login novamente.");
+      router.push("/");
+      return;
+    }
+
+    if (residuoData.imagens.length === 0) {
+      alert("Adicione pelo menos 1 imagem do resíduo.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("tipoResiduo", residuoData.tipoResiduo);
+      formData.append("descricao", residuoData.descricao);
+      formData.append("quantidade", residuoData.quantidade);
+      formData.append("unidade", residuoData.unidade);
+      formData.append("condicoes", residuoData.condicoes);
+      formData.append("disponibilidade", residuoData.disponibilidade);
+      formData.append("preco", residuoData.preco);
+      formData.append("empresaId", String(empresaId));
+      formData.append("userId", String(userId));
+
+      residuoData.imagens.forEach((file) => {
+        formData.append("imagens", file);
+      });
+
+      const response = await fetch("/api/residues/register-residues", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        const residuo = await response.json();
+        alert(`Resíduo cadastrado com sucesso! ${residuo.imagensCreated || 0} imagens foram salvas.`);
+        router.push("/my-offers");
+      } else {
+        let error: unknown = {};
+        try {
+          error = await response.json();
+        } catch {
+          error = {};
+        }
+        let errorMsg = `Erro ao cadastrar resíduo. Código HTTP: ${response.status}${response.statusText ? " - " + response.statusText : ""}`;
+        if (error && typeof error === "object") {
+          type ErrorResponse = { error?: string; message?: string };
+          const errObj = error as ErrorResponse;
+          if ("error" in errObj && typeof errObj.error === "string") {
+            errorMsg = errObj.error;
+          } else if ("message" in errObj && typeof errObj.message === "string") {
+            errorMsg = errObj.message;
+          }
+        }
+        alert(errorMsg);
+      }
+    } catch {
+      alert("Erro ao processar o cadastro. Tente novamente.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const isFormValid = () => {
     return (
@@ -428,12 +453,13 @@ export default function CadastrarResiduoPage() {
               <label className="text-gray-700 font-medium">Foto do Resíduo</label>
               <div
                 className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                  processingImages ? "border-blue-300 bg-blue-50" :
                   dragActive ? "border-teal-500 bg-teal-50" : "border-gray-300 bg-gray-50 hover:border-gray-400"
                 }`}
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
+                onDragEnter={processingImages ? undefined : handleDrag}
+                onDragLeave={processingImages ? undefined : handleDrag}
+                onDragOver={processingImages ? undefined : handleDrag}
+                onDrop={processingImages ? undefined : handleDrop}
               >
                 <input
                   type="file"
@@ -442,13 +468,44 @@ export default function CadastrarResiduoPage() {
                   accept="image/*"
                   onChange={(e) => handleImageUpload(e.target.files)}
                   className="hidden"
+                  disabled={processingImages}
                 />
-                <label htmlFor="images" className="cursor-pointer">
-                  <Camera className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-gray-500">Clique ou arraste imagem para inserir</p>
+                <label htmlFor="images" className={processingImages ? "cursor-not-allowed" : "cursor-pointer"}>
+                  {processingImages ? (
+                    <Loader2 className="w-12 h-12 text-blue-400 mx-auto mb-3 animate-spin" />
+                  ) : (
+                    <Camera className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                  )}
+                  <p className="text-gray-500">
+                    {processingImages ? "Processando imagens..." : "Clique ou arraste imagem para inserir"}
+                  </p>
                   <p className="text-sm text-gray-400 mt-1">Mínimo 1 e máximo 5 imagens</p>
+                  <p className="text-xs text-gray-400">
+                    Imagens suportadas: JPEG, PNG, etc. (até 500MB cada).<br />
+                    A conversão para base64 é feita automaticamente pela plataforma.
+                  </p>
                 </label>
               </div>
+              
+              {/* Indicador de progresso do processamento de imagens */}
+              {processingImages && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center space-x-3">
+                    <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-blue-800">
+                        Otimizando imagens... ({imageProcessingProgress.current}/{imageProcessingProgress.total})
+                      </p>
+                      <div className="w-full bg-blue-200 rounded-full h-2 mt-2">
+                        <div 
+                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${(imageProcessingProgress.current / imageProcessingProgress.total) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
               {residuoData.imagens.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                   {residuoData.imagens.map((image, index) => (
@@ -459,6 +516,14 @@ export default function CadastrarResiduoPage() {
                         alt={`Preview ${index + 1}`}
                         className="w-full h-20 object-cover rounded-lg border"
                       />
+                      
+                      {/* Indicador de otimização */}
+                      <div className="absolute bottom-1 left-1 bg-green-500 text-white rounded-full p-1">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      
                       <button
                         type="button"
                         onClick={() => removeImage(index)}

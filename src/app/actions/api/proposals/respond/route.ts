@@ -75,14 +75,26 @@ export async function PATCH(req: Request) {
       }
     })
 
-    // Se foi aceita, criar notificação de match
+
+    // Se foi aceita, criar notificação de match para ambos os lados
     if (acao === 'aceitar') {
+      // Para o proponente (usuário B)
+      await prisma.notificacoes.create({
+        data: {
+          tipo: 'MATCH_CONFIRMADO',
+          titulo: 'Match confirmado!',
+          mensagem: `Você tem um match com ${proposta.empresaReceptoraId}`,
+          empresaId: proposta.empresaProponenteId,
+          propostaId: proposta.id
+        }
+      })
+      // Para o receptor (usuário A)
       await prisma.notificacoes.create({
         data: {
           tipo: 'MATCH_CONFIRMADO',
           titulo: 'Match confirmado!',
           mensagem: `Você tem um match com ${proposta.empresaProponente.nome}`,
-          empresaId: proposta.empresaProponenteId,
+          empresaId: proposta.empresaReceptoraId,
           propostaId: proposta.id
         }
       })

@@ -56,7 +56,6 @@ export default function PropostasRecebidasPage() {
     if (!empresaId) return
 
     setProcessando(propostaId)
-    
     try {
       const response = await fetch("/actions/api/proposals/respond", {
         method: "PATCH",
@@ -71,17 +70,14 @@ export default function PropostasRecebidasPage() {
       })
 
       if (response.ok) {
-        // Atualizar status da proposta localmente
         setPropostas(prev => prev.map(p => 
           p.id === propostaId 
             ? { ...p, status: acao === 'aceitar' ? 'ACEITA' : 'REJEITADA' }
             : p
         ))
-        
-        if (acao === 'aceitar') {
-          alert("Proposta aceita! Um match foi criado.")
-        } else {
-          alert("Proposta rejeitada.")
+        // Chama a verificação de match imediatamente após aceitar
+        if (acao === 'aceitar' && window.dispatchEvent) {
+          window.dispatchEvent(new Event('check-match-modal'))
         }
       } else {
         const error = await response.json()
