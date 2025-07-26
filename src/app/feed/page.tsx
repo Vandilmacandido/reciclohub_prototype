@@ -1,8 +1,12 @@
 "use client"
 import { Search } from "lucide-react"
 import { useState, useEffect, useCallback } from "react"
+import io from "socket.io-client"
 import { ResiduoService, type Residuo } from "@/services/residuoService"
 import { ProposalModal } from "@/app/modals/proposal"
+
+
+let socket: ReturnType<typeof io> | null = null;
 
 export default function FeedPage() {
   const [residuos, setResiduos] = useState<Residuo[]>([])
@@ -46,6 +50,37 @@ export default function FeedPage() {
   useEffect(() => {
     loadResiduos()
   }, [currentPage, loadResiduos])
+
+  // Atualização instantânea via Socket.IO
+  useEffect(() => {
+    if (!socket) {
+      socket = io(); // Usa a URL padrão do backend, ajuste se necessário
+    }
+    const handleResiduoRegistrado = (novoResiduo: Residuo) => {
+      setResiduos(prev => {
+        // Evita duplicatas
+        if (prev.some(r => r.id === novoResiduo.id)) return prev;
+        // Só adiciona se estiver na primeira página
+        if (currentPage === 1) {
+          const novaLista = [novoResiduo, ...prev];
+          // Limita a 9 itens (página cheia)
+          return novaLista.slice(0, 9);
+        }
+        return prev;
+      });
+      // Atualiza total de páginas se necessário
+      setTotalPages(tp => {
+        // Se já está correto, mantém
+        if (residuos.length % 9 !== 0) return tp;
+        return tp + 1;
+      });
+    };
+    socket.on("residuo-registrado", handleResiduoRegistrado);
+    return () => {
+      socket?.off("residuo-registrado", handleResiduoRegistrado);
+    };
+     
+  }, [currentPage, residuos.length]);
 
   // Busca avançada
   const handleSearch = async () => {

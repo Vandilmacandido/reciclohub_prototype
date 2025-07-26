@@ -1,7 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { PrismaClient, ImagemResiduos } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { uploadFileToS3 } from "@/lib/s3";
 import * as formidable from "formidable";
+
+// Define the ImagemResiduos type according to your Prisma schema
+type ImagemResiduos = {
+  id: number;
+  url: string;
+  residuoId: number;
+  // Add other fields if necessary
+};
 
 export const config = {
   api: {

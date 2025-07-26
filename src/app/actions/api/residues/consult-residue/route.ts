@@ -58,7 +58,7 @@ export async function GET(req: Request) {
       preco: residuo.preco,
       empresaId: residuo.empresaId,
       userId: residuo.userId,
-      imagens: residuo.imagens.map((imagem) => ({
+      imagens: residuo.imagens.map((imagem: { id: number; url: string }) => ({
         id: imagem.id,
         url: imagem.url, // Agora retorna a URL do S3 diretamente
       })),

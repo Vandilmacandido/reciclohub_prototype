@@ -1,7 +1,14 @@
+// Interface local para ImagemResiduos
+interface ImagemResiduos {
+  id: number;
+  url: string;
+  residuoId: number;
+}
 import type { NextApiRequest, NextApiResponse } from "next";
-import { PrismaClient, ImagemResiduos } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { uploadFileToS3 } from "@/lib/s3";
 import formidable, { File as FormidableFile } from "formidable";
+import { Server as IOServer } from "socket.io";
 
 export const config = {
   api: {
@@ -103,6 +110,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       }
 
+      // Emite evento via Socket.IO para atualização instantânea
+      interface SocketWithIO extends NodeJS.Socket {
+        server: {
+          io?: IOServer;
+        };
+      }
+      const socketWithIO = res.socket as unknown as SocketWithIO;
+      const io: IOServer | undefined = socketWithIO.server.io;
+      if (io) {
+        io.emit("residuo-registrado", {
+          id: residuo.id,
+          tipoResiduo: residuo.tipoResiduo,
+          descricao: residuo.descricao,
+          quantidade: residuo.quantidade,
+          unidade: residuo.unidade,
+          condicoes: residuo.condicoes,
+          disponibilidade: residuo.disponibilidade,
+          preco: residuo.preco,
+          empresaId: residuo.empresaId,
+          userId: residuo.userId,
+          imagens: imagensCriadas.map(img => ({ id: img.id, url: img.url })),
+        });
+      }
       return res.status(201).json({
         success: true,
         id: residuo.id,

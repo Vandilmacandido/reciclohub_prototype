@@ -33,6 +33,13 @@ export async function PATCH(req: Request) {
       include: {
         empresaProponente: {
           select: {
+            id: true,
+            nome: true
+          }
+        },
+        empresaReceptora: {
+          select: {
+            id: true,
             nome: true
           }
         },
@@ -50,7 +57,7 @@ export async function PATCH(req: Request) {
       }, { status: 404 })
     }
 
-    const novoStatus = acao === 'aceitar' ? 'ACEITA' : 'REJEITADA'
+    const novoStatus = acao === 'aceitar' ? 'ACEITA' : 'CANCELADA'
     
     // Atualizar status da proposta
     await prisma.propostas.update({
@@ -70,7 +77,7 @@ export async function PATCH(req: Request) {
         tipo: tipoNotificacao,
         titulo: tituloNotificacao,
         mensagem: mensagemNotificacao,
-        empresaId: proposta.empresaProponenteId,
+        empresaId: proposta.empresaProponente.id,
         propostaId: proposta.id
       }
     })
@@ -83,8 +90,8 @@ export async function PATCH(req: Request) {
         data: {
           tipo: 'MATCH_CONFIRMADO',
           titulo: 'Match confirmado!',
-          mensagem: `Você tem um match com ${proposta.empresaReceptoraId}`,
-          empresaId: proposta.empresaProponenteId,
+          mensagem: `Você tem um match com ${proposta.empresaReceptora.nome}`,
+          empresaId: proposta.empresaProponente.id,
           propostaId: proposta.id
         }
       })
@@ -94,7 +101,7 @@ export async function PATCH(req: Request) {
           tipo: 'MATCH_CONFIRMADO',
           titulo: 'Match confirmado!',
           mensagem: `Você tem um match com ${proposta.empresaProponente.nome}`,
-          empresaId: proposta.empresaReceptoraId,
+          empresaId: proposta.empresaReceptora.id,
           propostaId: proposta.id
         }
       })

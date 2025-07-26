@@ -1,3 +1,16 @@
+model ChatLastSeen {
+  id                 Int      @id @default(autoincrement())
+  matchId            Int
+  empresaId          Int
+  lastSeenMessageId  Int
+  updatedAt          DateTime @updatedAt
+
+  match    Propostas @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  empresa  Empresas  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId, empresaId])
+  @@map("chat_last_seen")
+}
 // prisma/schema.prisma
 
 generator client {
@@ -58,6 +71,9 @@ model Empresas {
   propostasRecebidas Propostas[] @relation("EmpresaReceptora")
   notificacoes Notificacoes[]
 
+  chatMessages ChatMessage[] @relation("EmpresaChatMessages")
+  chatLastSeen ChatLastSeen[]
+
   @@map("empresas")
 }
 
@@ -82,8 +98,22 @@ model Propostas {
   empresaReceptora  Empresas @relation("EmpresaReceptora", fields: [empresaReceptoraId], references: [id])
   
   notificacoes Notificacoes[]
-
+  chatMessages ChatMessage[] @relation("PropostaChatMessages")
+  chatLastSeen ChatLastSeen[]
   @@map("propostas")
+}
+
+model ChatMessage {
+  id         Int      @id @default(autoincrement())
+  matchId    Int      // id da proposta aceita (Propostas.id)
+  senderId   Int      // empresaId do remetente
+  content    String
+  timestamp  DateTime @default(now())
+
+  match      Propostas @relation("PropostaChatMessages", fields: [matchId], references: [id], onDelete: Cascade)
+  sender     Empresas  @relation("EmpresaChatMessages", fields: [senderId], references: [id])
+
+  @@map("chat_messages")
 }
 
 model Notificacoes {
@@ -107,7 +137,6 @@ model Notificacoes {
 enum StatusProposta {
   PENDENTE
   ACEITA
-  REJEITADA
   CANCELADA
 }
 

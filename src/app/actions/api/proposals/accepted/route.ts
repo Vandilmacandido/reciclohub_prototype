@@ -34,7 +34,19 @@ export async function GET(req: Request) {
     })
 
     // Para cada proposta, retorna quem já foi notificado (empresaId)
-    const result = propostas.map((p) => {
+    type Notificacao = { empresaId: number; visualizada: boolean; tipo: string }
+    type Proposta = {
+      id: number
+      empresaProponenteId: number
+      empresaReceptoraId: number
+      empresaProponente: { nome: string; id: number }
+      empresaReceptora: { nome: string; id: number }
+      notificacoes: Notificacao[]
+      residuo: { tipoResiduo: string; empresa: { nome: string } }
+      status: string
+    }
+
+    const result = propostas.map((p: Proposta) => {
       // Nome da empresa do outro lado do match
       let companyName = "Empresa"
       if (p.empresaProponenteId === empresaIdNum) {
@@ -46,8 +58,8 @@ export async function GET(req: Request) {
         id: p.id,
         residueData: { companyName },
         notifiedEmpresaIds: p.notificacoes
-          .filter((n) => n.tipo === "MATCH_CONFIRMADO" && n.visualizada)
-          .map((n) => n.empresaId)
+          .filter((n: Notificacao) => n.tipo === "MATCH_CONFIRMADO" && n.visualizada)
+          .map((n: Notificacao) => n.empresaId)
       }
     })
 

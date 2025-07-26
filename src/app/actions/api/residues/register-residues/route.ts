@@ -1,6 +1,12 @@
+// Define a interface local para ImagemResiduos
+interface ImagemResiduos {
+  id: number;
+  url: string;
+  residuoId: number;
+}
 
 import { NextResponse } from "next/server";
-import { PrismaClient, ImagemResiduos } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { uploadFileToS3 } from "@/lib/s3";
 import formidable from "formidable";
 
