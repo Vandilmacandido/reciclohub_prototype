@@ -59,7 +59,7 @@ export async function GET(req: Request) {
     // Define the type for proposta
     interface Proposta {
       id: number;
-      mensagem: string;
+      mensagem: string | null;
       criadaEm: string | Date | null;
       empresaProponenteId: number;
       empresaReceptoraId: number;
@@ -81,7 +81,7 @@ export async function GET(req: Request) {
       return {
         id: String(p.id),
         userBId,
-        proposalData: { message: p.mensagem },
+        proposalData: { message: p.mensagem ?? "" },
         residueData: { companyName, descricao: p.residuo?.descricao },
         acceptedAt: p.criadaEm ? { seconds: Math.floor(new Date(p.criadaEm).getTime() / 1000) } : undefined,
         notifiedEmpresaIds: p.notificacoes

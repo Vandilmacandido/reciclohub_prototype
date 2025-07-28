@@ -68,39 +68,32 @@ export function MainLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-[#F4FBFB] md:ml-64 pt-16 md:pt-0">
       <Navbar />
       {/* HEADER PADRÃO */}
-      <div className="w-full bg-white shadow-sm py-3 px-6 flex items-center justify-between" style={{ minHeight: 64 }}>
+      <div
+        className="w-full bg-white shadow-sm py-3 px-4 sm:px-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0"
+        style={{ minHeight: 64 }}
+      >
         {/* Título */}
-        <div className="flex items-center gap-4">
-          <span className="text-2xl font-bold text-teal-700 tracking-tight">{getFallbackTitle()}</span>
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+          <span className="text-xl sm:text-2xl font-bold text-teal-700 tracking-tight truncate">{getFallbackTitle()}</span>
         </div>
-        {/* Barra de busca */}
-        <div className="flex-1 flex justify-center">
-          <input
-            type="text"
-            placeholder="Buscar..."
-            className="w-full max-w-md border border-teal-200 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-400 bg-gray-50 text-gray-700"
-            style={{ minWidth: 200 }}
-            // TODO: implementar busca global
-            disabled
-          />
-        </div>
+        {/* Barra de busca removida */}
         {/* Notificação e Perfil */}
-        <div className="flex items-center gap-6">
-          {/* Botão de notificação */}
-          <button className="relative p-2 rounded-full hover:bg-teal-50 focus:outline-none">
+        <div className="flex items-center gap-3 sm:gap-6 min-w-0 justify-end">
+          {/* Botão de notificação - oculto em mobile */}
+          <button className="relative p-2 rounded-full hover:bg-teal-50 focus:outline-none hidden sm:inline-flex">
             {/* Ícone de sino SVG inline para evitar dependência */}
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-teal-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
             {/* Badge de notificação (exemplo, pode ser dinâmico depois) */}
             {/* <span className="absolute top-1 right-1 w-3 h-3 bg-red-600 rounded-full"></span> */}
           </button>
-          {/* Perfil */}
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold">
+          {/* <Link href="/profile" ...> ... </Link> */}
+          <div className="items-center gap-2 min-w-0 sm:flex hidden group opacity-60 cursor-not-allowed select-none">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold text-base sm:text-lg">
               {userProfile?.name?.[0]?.toUpperCase() || "U"}
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold text-gray-900 leading-tight">{userProfile?.name || "Usuário"}</span>
-              <span className="text-xs text-gray-500">{userProfile?.role || "Usuário"}</span>
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs sm:text-sm font-semibold text-gray-900 leading-tight truncate max-w-[80px] sm:max-w-[120px]">{userProfile?.name || "Usuário"}</span>
+              <span className="text-[10px] sm:text-xs text-gray-500 truncate max-w-[80px] sm:max-w-[120px]">{userProfile?.role || "Usuário"}</span>
             </div>
           </div>
         </div>

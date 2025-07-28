@@ -21,7 +21,7 @@ export function MatchModal({ isOpen, onClose, offer }: MatchModalProps) {
 
   const handleStartChat = async () => {
     onClose()
-    window.location.href = `/chat/${offer.matchId || offer.id}`
+    window.location.href = `/chat`;
   }
 
   return (

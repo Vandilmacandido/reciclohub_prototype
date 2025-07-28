@@ -1,8 +1,8 @@
 "use client"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState, useMemo } from "react"
-import Navbar from "./Navbar"
-import { MatchModalContainer } from "@/app/modals/match"
+// ...existing code...
+import { MainLayout } from "../components/MainLayout"
 
 export default function ConditionalLayout({
   children,
@@ -36,13 +36,13 @@ export default function ConditionalLayout({
         setIsLoggedIn(loggedIn)
         
         // Se não estiver logado e tentar acessar rota protegida
-        if (!loggedIn && !publicRoutes.includes(pathname)) {
+        if (!loggedIn && pathname && !publicRoutes.includes(pathname)) {
           router.replace('/') // usar replace ao invés de push
         }
       } catch {
         // Removida a variável 'error' não utilizada
         setIsLoggedIn(false)
-        if (!publicRoutes.includes(pathname)) {
+        if (pathname && !publicRoutes.includes(pathname)) {
           router.replace('/')
         }
       }
@@ -64,7 +64,7 @@ export default function ConditionalLayout({
   }
 
   // Se estiver em rota pública, não mostrar navbar
-  if (publicRoutes.includes(pathname)) {
+  if (pathname && publicRoutes.includes(pathname)) {
     return (
       <div className="min-h-screen bg-[#F4FBFB]">
         {children}
@@ -72,16 +72,12 @@ export default function ConditionalLayout({
     )
   }
 
-  // Se estiver logado, mostrar com navbar
+  // Se estiver logado, mostrar com MainLayout (que já inclui Navbar e header)
   if (isLoggedIn) {
     return (
-      <>
-        <Navbar />
-        <div className="min-h-screen bg-[#F4FBFB] md:ml-64 pt-16 md:pt-0">
-          <MatchModalContainer />
-          {children}
-        </div>
-      </>
+      <MainLayout>
+        {children}
+      </MainLayout>
     )
   }
 

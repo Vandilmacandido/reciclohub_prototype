@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { MatchModalContainer } from "./modals/match";
-import { MainLayout } from "./components/MainLayout";
+import ConditionalLayout from "./components/ConditionalLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,10 +32,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {/* MatchModalContainer ficará disponível em todas as páginas */}
         <MatchModalContainer />
-        {/* O título pode ser passado via contexto, prop, ou cada página pode definir o seu. */}
-        <MainLayout>
-          {children}
-        </MainLayout>
+        <ConditionalLayout>{children}</ConditionalLayout>
       </body>
     </html>
   );
