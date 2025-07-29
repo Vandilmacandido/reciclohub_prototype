@@ -1,24 +1,9 @@
-model ChatLastSeen {
-  id                 Int      @id @default(autoincrement())
-  matchId            Int
-  empresaId          Int
-  lastSeenMessageId  Int
-  updatedAt          DateTime @updatedAt
-
-  match    Propostas @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  empresa  Empresas  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
-
-  @@unique([matchId, empresaId])
-  @@map("chat_last_seen")
-}
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -146,3 +131,18 @@ enum TipoNotificacao {
   PROPOSTA_REJEITADA
   MATCH_CONFIRMADO
 }
+
+model ChatLastSeen {
+  id                 Int      @id @default(autoincrement())
+  matchId            Int
+  empresaId          Int
+  lastSeenMessageId  Int
+  updatedAt          DateTime @updatedAt
+
+  match    Propostas @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  empresa  Empresas  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId, empresaId])
+  @@map("chat_last_seen")
+}
+// prisma/schema.prisma
