@@ -1,170 +1,465 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
-import { Eye, EyeOff } from "lucide-react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
+import Image from "next/image";
+import Link from "next/link";
+
+import { useState } from "react";
 
 export default function Home() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [keepLoggedIn, setKeepLoggedIn] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && localStorage.getItem("token")) {
-      router.replace("/feed")
-    }
-  }, [router])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
-    setLoading(true)
-
-    try {
-      const res = await fetch("/actions/api/user/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.error || "Erro ao realizar login.")
-        setLoading(false)
-        return
-      }
-
-      // Salva dados essenciais no localStorage
-      localStorage.setItem("token", "fake-token")
-      localStorage.setItem("user", JSON.stringify({ id: data.id, email: data.email, nome: data.nome }))
-      localStorage.setItem("userId", data.id) // id do usuário
-      localStorage.setItem("empresaId", data.empresaId) // id da empresa/indústria
-
-      // Redireciona para o feed
-      router.replace("/feed")
-    } catch {
-      setError("Erro ao conectar com o servidor.")
-    } finally {
-      setLoading(false)
-    }
-  }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md space-y-8">
-        {/* Logo */}
-        <div className="text-center">
-          <div className="flex items-center justify-center mb-8">
-            <Image
-              src="/RECICLOHUB_Green.png"
-              alt="RECICLOHUB_Green"
-              width={160}
-              height={80}
-              className="h-16 md:h-20 object-contain"
-            />
+    <main className="min-h-screen bg-white" id="">
+      {/* Header */}
+      <header className="border-b border-gray-200 bg-white">
+        <div className="container mx-auto flex items-center justify-between px-4 py-4">
+          {/* Logo */}
+          <div className="flex items-center">
+            <Image src="/RECICLOHUB_Green.png" alt="RecicloHub" width={150} height={40} className="h-8 w-auto" />
           </div>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-6">
+            <Link href="#benefits" className="text-gray-600 hover:text-teal-600 text-sm md:text-base">
+              Benefícios
+            </Link>
+            <Link href="#how-it-works" className="text-gray-600 hover:text-teal-600 text-sm md:text-base">
+              Como Funciona
+            </Link>
+            <Link href="#mission" className="text-gray-600 hover:text-teal-600 text-sm md:text-base">
+              Sobre Nós
+            </Link>
+            <Link
+              href="#cadastro"
+              className="rounded-md bg-[#00A2AA] px-4 py-2 text-sm md:text-base font-medium text-white hover:bg-teal-600"
+            >
+              Cadastre-se
+            </Link>
+            <Link
+              href="/login"
+              className="rounded-md bg-[#00A2AA] px-4 py-2 text-sm md:text-base font-medium text-white hover:bg-teal-600"
+            >
+              Login
+            </Link>
+          </nav>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden flex items-center justify-center rounded-md bg-[#00A2AA] p-2 text-white hover:bg-teal-600"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            <svg
+              className="h-6 w-6"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d={menuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+              />
+            </svg>
+          </button>
         </div>
 
-        {/* Login Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Email Field */}
-          <div className="space-y-2">
-            <label htmlFor="email" className="text-teal-600 font-medium text-sm">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-teal-400 rounded-lg focus:border-teal-600 focus:ring-0 bg-white text-gray-900 placeholder-gray-400"
-              placeholder="Digite seu email"
-              required
-              autoComplete="username"
-            />
+        {/* Mobile Menu Overlay */}
+        {menuOpen && (
+          <div className="fixed inset-0 z-50 bg-black bg-opacity-50">
+            <div className="absolute top-0 left-0 w-full h-full bg-white">
+              <div className="flex justify-end p-4">
+                <button
+                  className="text-gray-600 hover:text-teal-600"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <svg
+                    className="h-6 w-6"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+              <nav className="flex flex-col items-center space-y-6 mt-10">
+                <Link
+                  href="#benefits"
+                  className="text-gray-600 hover:text-teal-600 text-lg font-medium"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Benefícios
+                </Link>
+                <Link
+                  href="#how-it-works"
+                  className="text-gray-600 hover:text-teal-600 text-lg font-medium"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Como Funciona
+                </Link>
+                <Link
+                  href="#mission"
+                  className="text-gray-600 hover:text-teal-600 text-lg font-medium"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Sobre Nós
+                </Link>
+                <Link
+                  href="#cadastro"
+                  className="rounded-md bg-[#00A2AA] px-6 py-3 text-white font-medium hover:bg-teal-600"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Cadastre-se
+                </Link>
+              </nav>
+            </div>
           </div>
+        )}
+      </header>
 
-          {/* Password Field */}
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-teal-600 font-medium text-sm">
-              Senha
-            </label>
-            <div className="relative">
-              <input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 pr-12 border-2 border-teal-400 rounded-lg focus:border-teal-600 focus:ring-0 bg-white text-gray-900 placeholder-gray-400"
-                placeholder="Digite sua senha"
-                required
-                autoComplete="current-password"
-              />
+      {/* Hero Section */}
+      <section className="bg-[#83D5D9]/15 py-16 md:py-20">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="mb-6 text-3xl md:text-5xl font-extrabold text-[#00757B] leading-tight">
+            Conectando Indústrias,
+            <br />
+            Transformando Resíduos em
+            <br />
+            Oportunidades
+          </h1>
+          <p className="mx-auto mb-10 max-w-2xl text-sm md:text-lg text-gray-600 leading-relaxed">
+            Uma plataforma digital para troca, venda e doação de resíduos industriais entre empresas, promovendo a
+            simbiose industrial e impulsionando a economia circular no Brasil.
+          </p>
+          <div className="flex flex-col items-center justify-center space-y-4 md:flex-row md:space-x-4 md:space-y-0">
+            <Link
+              href="#cadastro"
+              className="rounded-full bg-[#00A2AA] px-6 py-3 text-sm font-bold md:text-base text-white hover:bg-teal-600"
+            >
+              Cadastre sua empresa
+            </Link>
+            <Link
+              href="#how-it-works"
+              className="rounded-full border border-[#00A2AA] bg-white px-6 py-3 text-sm md:text-base text-[#00A2AA] hover:bg-teal-50"
+            >
+              Saiba como funciona
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section id="benefits" className="py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <h1 className="mb-12 text-center text-3xl md:text-4xl font-extrabold text-[#00A2AA]">Por que usar nossa plataforma?</h1>
+          <div className="grid gap-8 md:grid-cols-3">
+            {/* Card 1 */}
+            <div className="rounded-lg bg-[#00A2AA] p-8 text-left border border-gray-200 text-white transform transition-transform duration-300 hover:scale-105 hover:-translate-y-2">
+              <h3 className="mb-4 text-xl font-bold ">Ganhos Econômicos</h3>
+              <p className="text-base font-medium leading-relaxed">
+                Reduza seus custos operacionais ao diminuir significativamente as despesas com o descarte de resíduos. Além disso, transforme o que antes era um problema em uma nova fonte de receita através da reutilização ou venda inteligente de materiais valorizáveis.
+              </p>
+            </div>
+
+            {/* Card 2 */}
+            <div className="rounded-lg bg-[#00A2AA] p-8 text-left border border-gray-200 text-white transform transition-transform duration-300 hover:scale-105 hover:-translate-y-2">
+              <h3 className="mb-4 text-xl font-bold">Sustentabilidade Prática</h3>
+              <p className="text-base font-medium leading-relaxed">
+                Contribua ativamente para um futuro mais verde ao reduzir o volume de resíduos destinados a aterros sanitários e diminuir a emissão de gases como o CO2 em suas operações. Demonstre seu compromisso ambiental e fortaleça a reputação da sua empresa junto a clientes e investidores.
+              </p>
+            </div>
+
+            {/* Card 3 */}
+            <div className="rounded-lg bg-[#00A2AA] p-8 text-left border border-gray-200 text-white transform transition-transform duration-300 hover:scale-105 hover:-translate-y-2">
+              <h3 className="mb-4 text-xl font-bold">Conexões Inteligentes</h3>
+              <p className="text-base font-medium leading-relaxed">
+                Amplie sua rede de contatos com empresas que possuem interesse nos seus resíduos ou que podem fornecer os materiais que você necessita. Estabeleça relações comerciais mutuamente benéficas e sustentáveis, impulsionando a economia circular em sua cadeia de valor.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How it Works Section */}
+      <section id="how-it-works" className="bg-[#83D5D9]/15 py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <h2 className="mb-12 text-center text-3xl md:text-4xl font-black text-[#00A2AA]">Como Funciona?</h2>
+          <div className="grid gap-12 md:grid-cols-2">
+            {/* Card 1 */}
+            <div className="relative flex flex-col items-start text-left rounded-lg bg-white p-8 shadow-md">
+              <div className="absolute -top-8 flex h-16 w-16 items-center justify-center rounded-full bg-[#00A2AA] text-xl font-semibold text-white">
+                1
+              </div>
+              <h3 className="mt-10 mb-4 text-lg md:text-xl font-bold text-[#5B5858]">Cadastre sua empresa</h3>
+              <p className="text-gray-600 text-sm md:text-base leading-relaxed">
+                Dedique alguns minutos para registrar sua empresa em nossa plataforma. Informe detalhes cruciais como o setor de atuação, a localização geográfica e os tipos de materiais (resíduos ou matérias-primas) com os quais você trabalha ou tem interesse. Ao fornecer informações precisas, você aumenta suas chances de ser encontrado por parceiros relevantes e de descobrir oportunidades que realmente se encaixam no seu negócio.
+              </p>
+            </div>
+
+            {/* Card 2 */}
+            <div className="relative flex flex-col items-start text-left rounded-lg bg-white p-8 shadow-md">
+              <div className="absolute -top-8 flex h-16 w-16 items-center justify-center rounded-full bg-[#00A2AA] text-xl font-semibold text-white">
+                2
+              </div>
+              <h3 className="mt-10 mb-4 text-lg md:text-xl font-bold text-[#5B5858]">Ofereça ou busque resíduos</h3>
+              <p className="text-gray-600 text-sm md:text-base leading-relaxed">
+                Utilize nossa interface intuitiva para listar os resíduos que sua empresa gera, especificando os tipos, quantidades e condições. Paralelamente, explore o catálogo de materiais disponíveis de outras empresas. Seja para encontrar uma solução sustentável para seus resíduos ou para adquirir matérias-primas a custos mais vantajosos, nossa plataforma facilita a conexão entre oferta e demanda de diversos materiais (como plásticos, metais, papel, têxteis e muitos outros).
+              </p>
+            </div>
+
+            {/* Card 3 */}
+            <div className="relative flex flex-col items-start text-left rounded-lg bg-white p-8 shadow-md">
+              <div className="absolute -top-8 flex h-16 w-16 items-center justify-center rounded-full bg-[#00A2AA] text-xl font-semibold text-white">
+                3
+              </div>
+              <h3 className="mt-10 mb-4 text-lg md:text-xl font-bold text-[#5B5858]">Negocie com outras empresas</h3>
+              <p className="text-gray-600 text-sm md:text-base leading-relaxed">
+                Entre em contato direto com outras empresas interessadas nos seus resíduos ou que oferecem os materiais que você procura. Utilize as ferramentas de comunicação da plataforma para discutir detalhes, negociar preços, condições de troca, venda ou até mesmo doação. Nossa plataforma visa facilitar a criação de relações comerciais transparentes e eficientes, otimizando o fluxo de materiais e promovendo a economia circular.
+              </p>
+            </div>
+
+            {/* Card 4 */}
+            <div className="relative flex flex-col items-start text-left rounded-lg bg-white p-8 shadow-md">
+              <div className="absolute -top-8 flex h-16 w-16 items-center justify-center rounded-full bg-[#00A2AA] text-xl font-semibold text-white">
+                4
+              </div>
+              <h3 className="mt-10 mb-4 text-lg md:text-xl font-bold text-[#5B5858]">Acompanhe os impactos</h3>
+              <p className="text-gray-600 text-sm md:text-base leading-relaxed">
+                Visualize de forma clara e objetiva as métricas geradas pelas suas transações na plataforma. Acompanhe a economia de custos obtida com a destinação inteligente de resíduos ou a aquisição de matérias-primas recicladas. Além disso, quantifique sua contribuição para a sustentabilidade através da redução de resíduos enviados para aterros e da diminuição da emissão de poluentes. Tenha dados concretos para demonstrar o valor da sua participação na economia circular.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mission Section */}
+      <section id="mission" className="py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="mb-10 text-3xl font-extrabold text-[#00A2AA]">
+            Juntos por um futuro
+            <br />
+            mais limpo e colaborativo.
+          </h2>
+          <div className="mx-auto max-w-3xl">
+            <p className="mb-8 text-center text-gray-600 leading-relaxed">
+              A RecicloHub é mais que um marketplace de resíduos — é uma rede de colaboração que{" "}
+              <span className="font-semibold">transforma passivos ambientais em ativos de valor</span>, fortalece
+              cadeias produtivas e{" "}
+              <span className="font-semibold">gera impacto positivo no meio ambiente e na economia local</span>.
+            </p>
+            <p className="text-center text-gray-700 font-bold text-xl leading-relaxed">
+              Transforme resíduos em valor. Construa parcerias sustentáveis. Faça parte da nova era industrial.
+            </p>
+          </div>
+        </div>
+      </section>
+
+
+      <>
+        {/* Cadastro Section */}
+        <section id="cadastro" className="py-16 md:py-20 bg-[#83D5D9]/15">
+          <div className="container mx-auto px-4">
+            <h2 className="mb-8 text-center text-3xl md:text-4xl font-extrabold text-[#00A2AA]">
+              Cadastre sua Empresa
+            </h2>
+            <form
+              id="reciclohub-form"
+              className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                const formData = new FormData(e.target as HTMLFormElement);
+                const data = Object.fromEntries(formData.entries());
+
+                try {
+                  const response = await fetch("https://api.sheetmonkey.io/form/qxyYQVeHBiYcpAeMYBzk8C", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data),
+                  });
+                  if (!response.ok) throw new Error("Erro na resposta do servidor");
+
+                  setShowSuccess(true);
+                  (e.target as HTMLFormElement).reset(); // Limpa o formulário
+                } catch (error) {
+                  console.error("Erro ao enviar cadastro:", error);
+                  setShowError(true);
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            >
+              {/* Campos do formulário */}
+              <div className="mb-6">
+                <label htmlFor="nomeEmpresa" className="block mb-2 text-sm font-medium text-gray-700">
+                  Nome da empresa <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="nomeEmpresa"
+                  name="nomeEmpresa"
+                  placeholder="Digite o nome da sua empresa"
+                  required
+                  className="w-full rounded-md border border-gray-300 p-3 text-sm text-black placeholder-gray-500 focus:border-teal-500 focus:ring-teal-500"
+                />
+              </div>
+
+              <div className="mb-6">
+                <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-700">
+                  E-mail de contato <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="Digite o e-mail de contato"
+                  required
+                  className="w-full rounded-md border border-gray-300 p-3 text-sm text-black placeholder-gray-500 focus:border-teal-500 focus:ring-teal-500"
+                />
+              </div>
+
+              <div className="mb-6">
+                <label htmlFor="telefone" className="block mb-2 text-sm font-medium text-gray-700">
+                  Telefone de contato
+                </label>
+                <input
+                  type="tel"
+                  id="telefone"
+                  name="telefone"
+                  placeholder="Digite o telefone com DDD (opcional)"
+                  className="w-full rounded-md border border-gray-300 p-3 text-sm text-black placeholder-gray-500 focus:border-teal-500 focus:ring-teal-500"
+                />
+              </div>
+
+              <div className="mb-6">
+                <label htmlFor="tipoResiduo" className="block mb-2 text-sm font-medium text-gray-700">
+                  Tipo de resíduo
+                </label>
+                <textarea
+                  id="tipoResiduo"
+                  name="tipoResiduo"
+                  placeholder="Descreva os tipos de resíduos que sua empresa gera ou precisa (opcional)"
+                  className="w-full rounded-md border border-gray-300 p-3 text-sm text-black placeholder-gray-500 focus:border-teal-500 focus:ring-teal-500"
+                ></textarea>
+              </div>
+
+              <div className="mb-6">
+                <label htmlFor="interesse" className="block mb-2 text-sm font-medium text-gray-700">
+                  Interesse <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="interesse"
+                  name="interesse"
+                  required
+                  className="w-full rounded-md border border-gray-300 p-3 text-sm text-gray-600 focus:border-teal-500 focus:ring-teal-500"
+                >
+                  <option value="" className="text-gray-500">Selecione uma opção</option>
+                  <option value="receber" className="text-gray-600">Receber resíduos</option>
+                  <option value="trocar" className="text-gray-600">Trocar resíduos</option>
+                  <option value="vender" className="text-gray-600">Vender resíduos</option>
+                </select>
+              </div>
+
               <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-teal-400 hover:text-teal-600 transition-colors"
-                tabIndex={-1}
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-md bg-[#00A2AA] px-6 py-3 text-white font-medium hover:bg-teal-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {showPassword ? <EyeOff className="w-5 h-5 hover:cursor-pointer" /> : <Eye className="w-5 h-5 hover:cursor-pointer" />}
+                {loading ? "Enviando..." : "Cadastrar Empresa"}
+              </button>
+            </form>
+          </div>
+        </section>
+
+        {/* Popup de Sucesso */}
+        {showSuccess && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-sm">
+              <h2 className="text-2xl font-bold text-[#00A2AA] mb-4">Cadastro Enviado!</h2>
+              <p className="text-gray-700 mb-6">Obrigado por se cadastrar em nossa plataforma.</p>
+              <button
+                onClick={() => setShowSuccess(false)}
+                className="rounded-md bg-[#00A2AA] px-6 py-2 text-white font-medium hover:bg-teal-600"
+              >
+                Fechar
               </button>
             </div>
           </div>
+        )}
 
-          {/* Error message */}
-          {error && (
-            <div className="text-red-600 text-sm text-center">{error}</div>
-          )}
-
-          {/* Keep logged in and Forgot password */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <input
-                id="keep-logged-in"
-                type="checkbox"
-                checked={keepLoggedIn}
-                onChange={(e) => setKeepLoggedIn(e.target.checked)}
-                className="border-teal-400 accent-teal-600 cursor-pointer"
-              />
-              <label htmlFor="keep-logged-in" className="text-sm text-teal-600 cursor-pointer">
-                Manter conectado
-              </label>
+        {/* Popup de Erro */}
+        {showError && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white p-8 rounded-lg shadow-lg text-center max-w-sm">
+              <h2 className="text-2xl font-bold text-red-500 mb-4">Erro ao Enviar</h2>
+              <p className="text-gray-700 mb-6">Não conseguimos processar seu cadastro. Tente novamente.</p>
+              <button
+                onClick={() => setShowError(false)}
+                className="rounded-md bg-red-500 px-6 py-2 text-white font-medium hover:bg-red-600"
+              >
+                Fechar
+              </button>
             </div>
-            <Link
-              href="/forgot-password"
-              className="text-sm text-teal-600 hover:text-teal-700 hover:underline transition-colors"
-            >
-              Esqueceu a senha?
-            </Link>
           </div>
+        )}
+      </>
 
-          {/* Login Button */}
-          <button
-            type="submit"
-            className="w-full bg-teal-600 hover:bg-teal-700 hover:cursor-pointer text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 text-base"
-            disabled={loading}
-          >
-            {loading ? "Entrando..." : "Entrar"}
-          </button>
-        </form>
-
-        {/* Register Link */}
-        <div className="text-center pt-4">
-          <p className="text-teal-600 text-sm">
-            Ainda não possui conta?{" "}
-            <Link href="/register" className="font-medium  hover:text-teal-700 underline transition-colors">
-              Cadastre-se
-            </Link>
-          </p>
+      {/* Footer */}
+      <footer id="footer" className="bg-[#00757B] py-12 text-white">
+        <div className="container mx-auto px-4">
+          <div className="grid gap-8 md:grid-cols-3">
+            <div>
+              <Image src="/RecicloHUB_White.png" alt="RecicloHub" width={150} height={40} className="mb-4 h-8 w-auto" />
+              <p className="text-sm md:text-base text-white font-bold">
+                Conectando indústrias para um futuro mais sustentável através da economia circular e colaboração.
+              </p>
+            </div>
+            <div>
+              <h3 className="mb-4 text-lg font-semibold">Links</h3>
+              <ul className="space-y-2 text-white">
+                <li>
+                  <Link href="#benefits" className="hover:text-gray-300 hover:cursor-pointer">
+                    Benefícios
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#how-it-works" className="hover:text-gray-300 hover:cursor-pointer">
+                    Como Funciona
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#mission" className="hover:text-gray-300 hover:cursor-pointer">
+                    Sobre Nós
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="mb-4 text-lg font-semibold">Contato</h3>
+              <a
+                href="mailto:reciclohub@gmail.com"
+                className="mb-2 text-white hover:text-gray-300 hover:cursor-pointer"
+                rel="noopener noreferrer"
+              >
+                reciclohub@gmail.com
+              </a>
+              <p className="text-white">Caruaru-PE</p>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  )
+      </footer>
+    </main>
+  );
 }
