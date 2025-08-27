@@ -303,7 +303,7 @@ export default function Home() {
             <h2 className="mb-12 text-left text-3xl md:text-4xl font-extrabold text-white">Sobre Nós</h2>
           </div>
           
-          <div className="grid gap-8 md:gap-12 lg:gap-16 md:grid-cols-2 items-start md:items-center">
+          <div className="grid gap-8 md:gap-12 lg:gap-16 md:grid-cols-2 items-start">
             {/* Coluna 1 - Texto */}
             <div className="order-1">
               <div className="animate-fade-in-up" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
