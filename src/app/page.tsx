@@ -487,7 +487,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="grid gap-8 md:grid-cols-3">
             <div>
-              <Image src="/RecicloHUB_White.png" alt="RecicloHub" width={150} height={40} className="mb-4 h-8 w-auto" />
+              <Image src="/reciclohub.newLogo.svg" alt="RecicloHub" width={150} height={40} className="mb-4 h-8 w-auto" />
               <p className="text-sm md:text-base text-white font-bold">
                 Conectando indústrias para um futuro mais sustentável através da economia circular e colaboração.
               </p>
