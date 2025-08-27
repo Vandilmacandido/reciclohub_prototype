@@ -303,9 +303,9 @@ export default function Home() {
             <h2 className="mb-12 text-left text-3xl md:text-4xl font-extrabold text-white">Sobre Nós</h2>
           </div>
           
-          <div className="grid gap-8 md:grid-cols-2 items-center">
-            {/* Coluna 1 */}
-            <div className="text-left w-auto">
+          <div className="grid gap-8 md:gap-12 lg:gap-16 md:grid-cols-2 items-start md:items-center">
+            {/* Coluna 1 - Texto */}
+            <div className="order-1">
               <div className="animate-fade-in-up" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
                 <p className="mb-6 text-sm md:text-base text-white leading-relaxed">
                   Mais do que uma plataforma, somos um ecossistema que conecta empresas, promovendo a economia circular e transformando resíduos em oportunidades de negócio, visando um futuro mais sustentável e colaborativo. Buscamos alinhar os interesses das empresas com as necessidades ambientais, criando um impacto positivo que vai além do lucro imediato.
@@ -319,9 +319,17 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Coluna 2 */}
-            <div className="flex justify-center md:justify-end">
+            {/* Coluna 2 - Imagem */}
+            <div className="order-2 flex justify-center">
               <div className="animate-fade-in-up" style={{ animationDelay: '0.8s', animationFillMode: 'both' }}>
+                <Image
+                  src="/MonitorAboutUs.png"
+                  alt="Sobre Nós - RecicloHub"
+                  width={400}
+                  height={400}
+                  className="w-full max-w-sm sm:max-w-md lg:max-w-lg h-auto rounded-lg"
+                  priority
+                />
               </div>
             </div>
           </div>
