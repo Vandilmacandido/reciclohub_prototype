@@ -322,7 +322,7 @@ export default function CadastrarResiduoPage() {
                 id="tipoResiduo"
                 value={residuoData.tipoResiduo}
                 onChange={(e) => handleInputChange("tipoResiduo", e.target.value)}
-                className="w-full text-gray-400 bg-gray-100 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full text-gray-400 bg-gray-100 border border-[#00A2AA]/50 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#00A2AA] focus:border-[#00A2AA]"
               >
                 <option value="">Selecione o tipo de resíduo</option>
                 {tiposResiduos.map((tipo) => (
@@ -342,7 +342,7 @@ export default function CadastrarResiduoPage() {
                 id="descricao"
                 value={residuoData.descricao}
                 onChange={(e) => handleInputChange("descricao", e.target.value)}
-                className="w-full h-32 px-3 py-2 bg-gray-100 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent placeholder-gray-400 text-gray-400"
+                className="w-full h-32 px-3 py-2 bg-gray-100 border border-[#00A2AA]/50 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-[#00A2AA] focus:border-[#00A2AA] placeholder-gray-400 text-gray-400"
                 placeholder="Descreva detalhadamente o resíduo, suas características, origem, composição..."
               />
             </div>
@@ -355,13 +355,13 @@ export default function CadastrarResiduoPage() {
                   type="number"
                   value={residuoData.quantidade}
                   onChange={(e) => handleInputChange("quantidade", e.target.value)}
-                  className="bg-gray-100 border text-gray-400 border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 placeholder-gray-400"
+                  className="bg-gray-100 border text-gray-400 border-[#00A2AA]/50 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#00A2AA] focus:border-[#00A2AA] placeholder-gray-400"
                   placeholder="Ex: 500"
                 />
                 <select
                   value={residuoData.unidade}
                   onChange={(e) => handleInputChange("unidade", e.target.value)}
-                  className="bg-gray-100 border text-gray-400 border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="bg-gray-100 border text-gray-400 border-[#00A2AA]/50 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#00A2AA] focus:border-[#00A2AA]"
                 >
                   {unidades.map((unidade) => (
                     <option key={unidade} value={unidade}>
@@ -381,7 +381,7 @@ export default function CadastrarResiduoPage() {
                 id="condicoes"
                 value={residuoData.condicoes}
                 onChange={(e) => handleInputChange("condicoes", e.target.value)}
-                className="w-full h-24 px-3 py-2 bg-gray-100 text-gray-400 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent placeholder-gray-400"
+                className="w-full h-24 px-3 py-2 bg-gray-100 text-gray-400 border border-[#00A2AA]/50 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-[#00A2AA] focus:border-[#00A2AA] placeholder-gray-400"
                 placeholder="Descreva como o resíduo está armazenado, condições ambientais, embalagem..."
               />
             </div>
@@ -442,7 +442,7 @@ export default function CadastrarResiduoPage() {
                 type="text"
                 value={residuoData.preco}
                 onChange={(e) => handleInputChange("preco", e.target.value)}
-                className="bg-gray-100 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 text-gray-400 focus:ring-teal-500 placeholder-gray-400"
+                className="bg-gray-100 border border-[#00A2AA]/50 rounded px-3 py-2 focus:outline-none focus:ring-2 text-gray-400 focus:ring-[#00A2AA] focus:border-[#00A2AA] placeholder-gray-400"
                 placeholder="Ex: R$ 2,50 por kg"
                 disabled={residuoData.disponibilidade !== "venda"}
               />

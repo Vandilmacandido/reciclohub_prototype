@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-  "build": "prisma generate && next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint"
   },
@@ -17,6 +17,7 @@
     "browser-image-compression": "^2.0.2",
     "firebase-admin": "^13.4.0",
     "formidable": "^3.5.4",
+    "framer-motion": "^12.23.12",
     "lucide": "^0.511.0",
     "lucide-react": "^0.511.0",
     "mysql2": "^3.14.1",

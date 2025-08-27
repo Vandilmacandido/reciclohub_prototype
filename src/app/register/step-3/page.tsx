@@ -116,13 +116,13 @@ export default function RegisterStep3() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md space-y-8">
-        {/* Logo */}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br bg-[#00A2AA]/14 px-4 py-8">
+      <div className="w-full max-w-lg bg-white rounded-2xl shadow-lg p-8 space-y-8 border border-teal-100">
+        {/* Logo e título */}
         <div className="text-center">
           <div className="flex items-center justify-center mb-4">
             <Image
-              src="/RECICLOHUB_Green.png"
+              src="/reciclohub.newLogo.svg"
               alt="RECICLOHUB Logo"
               width={160}
               height={80}
@@ -130,13 +130,13 @@ export default function RegisterStep3() {
               priority
             />
           </div>
-          <h2 className="text-xl font-medium text-teal-600 mb-2">CADASTRO</h2>
+          <h2 className="text-xl font-semibold text-[#00A2AA] mb-2">Cadastro</h2>
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <div className="w-8 h-1 bg-teal-600 rounded-full"></div>
-            <div className="w-8 h-1 bg-teal-600 rounded-full"></div>
-            <div className="w-8 h-1 bg-teal-400 rounded-full"></div>
+            <div className="w-8 h-1 bg-[#00A2AA] rounded-full"></div>
+            <div className="w-8 h-1 bg-[#00A2AA] rounded-full"></div>
+            <div className="w-8 h-1 bg-[#00A2AA] rounded-full"></div>
           </div>
-          <p className="text-sm text-teal-600">Etapa 3 de 3 - Finalizar Cadastro</p>
+          <p className="text-sm text-[#716F6F]">Etapa 3 de 3 - Finalizar Cadastro</p>
         </div>
 
         {/* Form */}
@@ -150,7 +150,7 @@ export default function RegisterStep3() {
 
             {/* Password */}
             <div className="space-y-2">
-              <label htmlFor="password" className="text-teal-600 font-medium text-sm">
+              <label htmlFor="password" className="block text-[#5B5858] font-medium text-sm mb-1">
                 Senha *
               </label>
               <div className="relative">
@@ -161,15 +161,15 @@ export default function RegisterStep3() {
                   onChange={(e) => handleInputChange("password", e.target.value)}
                   autoComplete="new-password"
                   inputMode="text"
-                  className={`appearance-none w-full px-4 py-3 pr-12 border-2 rounded-lg focus:ring-0 bg-white text-gray-900 placeholder-gray-400 ${
-                    errors.password ? "border-red-400 focus:border-red-600" : "border-teal-400 focus:border-teal-600"
+                  className={`appearance-none w-full px-4 py-3 pr-12 border-2 rounded-lg focus:ring-0 bg-white text-gray-900 placeholder-gray-400 transition ${
+                    errors.password ? "border-red-400 focus:border-red-600" : "border-[#00A2AA]/50 focus:border-[#00A2AA]"
                   }`}
                   placeholder="Mínimo 8 caracteres"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-teal-600 hover:text-teal-700 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#00A2AA] hover:text-[#00A2AA]/80 transition-colors"
                   tabIndex={-1}
                   aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                 >
@@ -181,7 +181,7 @@ export default function RegisterStep3() {
 
             {/* Confirm Password */}
             <div className="space-y-2">
-              <label htmlFor="confirmPassword" className="text-teal-600 font-medium text-sm">
+              <label htmlFor="confirmPassword" className="block text-[#5B5858] font-medium text-sm mb-1">
                 Confirmar Senha *
               </label>
               <div className="relative">
@@ -192,17 +192,17 @@ export default function RegisterStep3() {
                   onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                   autoComplete="new-password"
                   inputMode="text"
-                  className={`appearance-none w-full px-4 py-3 pr-12 border-2 rounded-lg focus:ring-0 bg-white text-gray-900 placeholder-gray-400 ${
+                  className={`appearance-none w-full px-4 py-3 pr-12 border-2 rounded-lg focus:ring-0 bg-white text-gray-900 placeholder-gray-400 transition ${
                     errors.confirmPassword
                       ? "border-red-400 focus:border-red-600"
-                      : "border-teal-400 focus:border-teal-600"
+                      : "border-[#00A2AA]/50 focus:border-[#00A2AA]"
                   }`}
                   placeholder="Digite a senha novamente"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-teal-600 hover:text-teal-700 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#00A2AA] hover:text-[#00A2AA]/80 transition-colors"
                   tabIndex={-1}
                   aria-label={showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
                 >
@@ -258,7 +258,7 @@ export default function RegisterStep3() {
           <div className="flex space-x-4 pt-4">
             <button
               type="button"
-              className="flex-1 bg-[#7FD0D4] hover:bg-[#00A2AA] text-white border border-teal-300 hover:cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+              className="flex-1 bg-[#00A2AA] hover:bg-[#008C8C] text-white border  hover:cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
               onClick={() => router.push("/register")}
             >
               <ChevronLeft className="w-4 h-4" />
@@ -267,7 +267,7 @@ export default function RegisterStep3() {
             <button
               type="submit"
               disabled={!isFormValid()}
-              className="flex-1 bg-teal-600 cursor-pointer hover:bg-teal-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200"
+              className="flex-1 bg-[#00A2AA] hover:bg-[#008C8C] cursor-pointer  disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200"
             >
               Finalizar Cadastro
             </button>
