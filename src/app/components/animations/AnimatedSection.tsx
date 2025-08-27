@@ -1,8 +1,6 @@
 "use client"
 
-import { motion } from 'framer-motion';
-import { useInView } from 'framer-motion';
-import { useRef, ReactNode } from 'react';
+import { useRef, useEffect, useState, ReactNode } from 'react';
 import { useIsMobile, useReducedMotion } from './hooks';
 
 interface AnimatedSectionProps {
@@ -18,50 +16,69 @@ export default function AnimatedSection({
   delay = 0, 
   className = "" 
 }: AnimatedSectionProps) {
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
   const { isMobile, isTablet } = useIsMobile();
   const prefersReducedMotion = useReducedMotion();
-  
-  const isInView = useInView(ref, { 
-    once: true, 
-    // Inicia a animação assim que entra no viewport para mobile, mais tarde para desktop
-    margin: isMobile ? "0px 0px -100px 0px" : isTablet ? "-100px 0px -200px 0px" : "-200px 0px -200px 0px"
-  });
 
-  // Se prefere movimento reduzido, apenas fade simples
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          const adjustedDelay = isMobile ? delay * 0.1 : isTablet ? delay * 0.3 : delay;
+          
+          setTimeout(() => {
+            setIsVisible(true);
+          }, adjustedDelay);
+          
+          observer.unobserve(entry.target);
+        }
+      },
+      {
+        rootMargin: isMobile ? "0px 0px -50px 0px" : 
+                   isTablet ? "-50px 0px -100px 0px" : 
+                   "-100px 0px -100px 0px",
+        threshold: 0.1
+      }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, [delay, isMobile, isTablet]);
+
+  // Movimento reduzido
   if (prefersReducedMotion) {
     return (
-      <motion.div
+      <div
         ref={ref}
         id={id}
-        className={className}
-        initial={{ opacity: 0 }}
-        animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-        transition={{ duration: 0.3 }}
+        className={`${className} transition-opacity duration-300 ${
+          isVisible ? 'opacity-100' : 'opacity-0'
+        }`}
       >
         {children}
-      </motion.div>
+      </div>
     );
   }
 
   return (
-    <motion.div
+    <div
       ref={ref}
       id={id}
-      className={className}
-      initial={{ opacity: 0, y: isMobile ? 20 : isTablet ? 30 : 60 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: isMobile ? 20 : isTablet ? 30 : 60 }}
-      transition={{
-        // Animações muito mais rápidas para mobile
-        duration: isMobile ? 0.4 : isTablet ? 0.6 : 0.8,
-        delay: isMobile ? (delay * 0.1) / 1000 : isTablet ? (delay * 0.3) / 1000 : delay / 1000,
-        ease: isMobile ? [0.25, 0.1, 0.25, 1] : [0.25, 0.1, 0.25, 1],
-        type: "spring",
-        stiffness: isMobile ? 300 : isTablet ? 200 : 160,
-        damping: isMobile ? 40 : isTablet ? 35 : 28
-      }}
+      className={`${className} transition-all duration-700 ease-out transform ${
+        isVisible 
+          ? 'opacity-100 translate-y-0' 
+          : `opacity-0 ${
+              isMobile ? 'translate-y-5' : 
+              isTablet ? 'translate-y-8' : 
+              'translate-y-12'
+            }`
+      }`}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
