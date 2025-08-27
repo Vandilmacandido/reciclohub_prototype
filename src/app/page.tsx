@@ -300,37 +300,20 @@ export default function Home() {
       <section id="mission" className="py-16 md:py-32 bg-[#00A2AA]">
         <div className="container mx-auto px-4">
           <div className="animate-fade-in-up" style={{ animationDelay: '0.2s', animationFillMode: 'both' }}>
-            <h2 className="mb-12 text-left text-3xl md:text-4xl font-extrabold text-white">Sobre Nós</h2>
+            <h2 className="mb-12 text-center text-3xl md:text-4xl font-extrabold text-white">Sobre Nós</h2>
           </div>
           
-          <div className="grid gap-8 md:gap-12 lg:gap-16 md:grid-cols-2 items-start md:items-center">
-            {/* Coluna 1 - Texto */}
-            <div className="order-1">
-              <div className="animate-fade-in-up" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
-                <p className="mb-6 text-sm md:text-base text-white leading-relaxed">
-                  Mais do que uma plataforma, somos um ecossistema que conecta empresas, promovendo a economia circular e transformando resíduos em oportunidades de negócio, visando um futuro mais sustentável e colaborativo. Buscamos alinhar os interesses das empresas com as necessidades ambientais, criando um impacto positivo que vai além do lucro imediato.
-                </p>
-              </div>
-              
-              <div className="animate-fade-in-up" style={{ animationDelay: '0.6s', animationFillMode: 'both' }}>
-                <p className="mb-6 text-sm md:text-base text-white leading-relaxed">
-                  Seja através de nosso marketplace para transformar aquele resíduo que seria descartado em uma nova fonte de renda, como também através de ferramentas de gerenciamento destes resíduos, facilitando a emissão de relatórios PGRS, o RecicloHub se propõe a ser o parceiro ideal para empresas comprometidas com a sustentabilidade, oferecendo suporte para cada etapa do processo.
-                </p>
-              </div>
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="animate-fade-in-up" style={{ animationDelay: '0.4s', animationFillMode: 'both' }}>
+              <p className="mb-6 text-sm md:text-base text-white leading-relaxed">
+                Mais do que uma plataforma, somos um ecossistema que conecta empresas, promovendo a economia circular e transformando resíduos em oportunidades de negócio, visando um futuro mais sustentável e colaborativo. Buscamos alinhar os interesses das empresas com as necessidades ambientais, criando um impacto positivo que vai além do lucro imediato.
+              </p>
             </div>
-
-            {/* Coluna 2 - Imagem */}
-            <div className="order-2 flex justify-center">
-              <div className="animate-fade-in-up" style={{ animationDelay: '0.8s', animationFillMode: 'both' }}>
-                <Image
-                  src="/MonitorAboutUs.png"
-                  alt="Sobre Nós - RecicloHub"
-                  width={400}
-                  height={400}
-                  className="w-full max-w-sm sm:max-w-md lg:max-w-lg h-auto rounded-lg"
-                  priority
-                />
-              </div>
+            
+            <div className="animate-fade-in-up" style={{ animationDelay: '0.6s', animationFillMode: 'both' }}>
+              <p className="mb-6 text-sm md:text-base text-white leading-relaxed">
+                Seja através de nosso marketplace para transformar aquele resíduo que seria descartado em uma nova fonte de renda, como também através de ferramentas de gerenciamento destes resíduos, facilitando a emissão de relatórios PGRS, o RecicloHub se propõe a ser o parceiro ideal para empresas comprometidas com a sustentabilidade, oferecendo suporte para cada etapa do processo.
+              </p>
             </div>
           </div>
         </div>
