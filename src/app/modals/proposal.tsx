@@ -132,7 +132,7 @@ export function ProposalModal({ isOpen, onClose, offer }: ProposalModalProps) {
                   onChange={(e) => handleInputChange("quantity", e.target.value)}
                   placeholder="Ex: 100 kg"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-400 placeholder-gray-400"
+                  className="w-full px-3 py-2 border border-[#00A2AA]/50 rounded focus:outline-none focus:ring-2 focus:ring-[#00A2AA] focus:border-[#00A2AA] text-gray-400 placeholder-gray-400"
                 />
               </div>
 
@@ -145,7 +145,7 @@ export function ProposalModal({ isOpen, onClose, offer }: ProposalModalProps) {
                   value={formData.frequency}
                   onChange={(e) => handleInputChange("frequency", e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-400 placeholder-gray-400"
+                  className="w-full px-3 py-2 border border-[#00A2AA]/50 rounded focus:outline-none focus:ring-2 focus:ring-[#00A2AA] focus:border-[#00A2AA] text-gray-400 placeholder-gray-400"
                 >
                   <option value="" className="text-gray-400">Selecione a frequência</option>
                   <option value="semanal" className="text-gray-400">Semanal</option>
@@ -164,7 +164,7 @@ export function ProposalModal({ isOpen, onClose, offer }: ProposalModalProps) {
                   value={formData.transportType}
                   onChange={(e) => handleInputChange("transportType", e.target.value)}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-400 placeholder-gray-400"
+                  className="w-full px-3 py-2 border border-[#00A2AA]/50 rounded focus:outline-none focus:ring-2 focus:ring-[#00A2AA] focus:border-[#00A2AA] text-gray-400 placeholder-gray-400"
                 >
                   <option value="" className="text-gray-400">Como será o transporte?</option>
                   <option value="proprio" className="text-gray-400">Transporte Próprio</option>
@@ -183,7 +183,7 @@ export function ProposalModal({ isOpen, onClose, offer }: ProposalModalProps) {
                   value={formData.price}
                   onChange={(e) => handleInputChange("price", e.target.value)}
                   placeholder="Ex: R$ 2,00/kg ou Gratuito"
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-400 placeholder-gray-400"
+                  className="w-full px-3 py-2 border border-[#00A2AA]/50 rounded focus:outline-none focus:ring-2 focus:ring-[#00A2AA] focus:border-[#00A2AA] text-gray-400 placeholder-gray-400"
                 />
                 <p className="text-xs text-gray-500">Deixe em branco para aceitar o preço sugerido</p>
               </div>
@@ -196,7 +196,7 @@ export function ProposalModal({ isOpen, onClose, offer }: ProposalModalProps) {
                   id="message"
                   value={formData.message}
                   onChange={(e) => handleInputChange("message", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded resize-none h-20 focus:outline-none focus:ring-2 focus:ring-teal-500 text-gray-400 placeholder-gray-400"
+                  className="w-full px-3 py-2 border border-[#00A2AA]/50 rounded resize-none h-20 focus:outline-none focus:ring-2 focus:ring-[#00A2AA] focus:border-[#00A2AA] text-gray-400 placeholder-gray-400"
                   placeholder="Adicione informações extras sobre sua proposta..."
                 />
               </div>

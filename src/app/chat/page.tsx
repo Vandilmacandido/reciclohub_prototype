@@ -421,7 +421,7 @@ export default function ChatPage() {
                       onChange={(e) => setMessage(e.target.value)}
                       placeholder="Digite sua mensagem..."
                       onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-                      className="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="flex-1 border border-[#00A2AA]/50 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#00A2AA] focus:border-[#00A2AA]"
                     />
                     <button
                       type="button"

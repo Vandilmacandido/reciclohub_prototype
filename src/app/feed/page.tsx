@@ -241,7 +241,7 @@ export default function FeedPage() {
             <input
               type="text"
               placeholder="Buscar por empresa ou material..."
-              className="pl-10 bg-white border text-gray-900 border-gray-300 h-12 rounded w-full"
+              className="pl-10 bg-white border text-gray-900 border-[#00A2AA]/50 h-12 rounded w-full focus:border-[#00A2AA]"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
@@ -249,7 +249,7 @@ export default function FeedPage() {
           </div>
           <div className="w-full md:w-64">
             <select
-              className="bg-white border text-gray-900 border-gray-300 h-12 rounded w-full px-3"
+              className="bg-white border text-gray-900 border-[#00A2AA]/50 h-12 rounded w-full px-3 focus:border-[#00A2AA]"
               value={selectedCity}
               onChange={(e) => setSelectedCity(e.target.value)}
             >

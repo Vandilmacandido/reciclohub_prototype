@@ -57,18 +57,21 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md space-y-8">
-        {/* Logo */}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#00A2AA]/14 px-4 py-8">
+      <div className="w-full max-w-lg bg-white rounded-2xl shadow-lg p-8 space-y-8 border border-teal-100">
+        {/* Logo e título */}
         <div className="text-center">
-          <div className="flex items-center justify-center mb-8">
-            <Image
-              src="/RECICLOHUB_Green.png"
-              alt="RECICLOHUB_Green"
-              width={160}
-              height={80}
-              className="h-16 md:h-20 object-contain"
-            />
+          <div className="flex items-center justify-center mb-4">
+            <Link href="/" className="transition-opacity hover:opacity-80">
+              <Image
+                src="/reciclohub.newLogo.svg"
+                alt="RECICLOHUB Logo"
+                width={160}
+                height={80}
+                className="h-16 md:h-20 object-contain cursor-pointer"
+                priority
+              />
+            </Link>
           </div>
         </div>
 
@@ -76,7 +79,7 @@ export default function Login() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Email Field */}
           <div className="space-y-2">
-            <label htmlFor="email" className="text-teal-600 font-medium text-sm">
+            <label htmlFor="email" className="block text-[#5B5858] font-medium text-sm mb-1">
               Email
             </label>
             <input
@@ -84,7 +87,7 @@ export default function Login() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-teal-400 rounded-lg focus:border-teal-600 focus:ring-0 bg-white text-gray-900 placeholder-gray-400"
+              className="w-full px-4 py-3 border-2 border-[#00A2AA]/50 rounded-lg focus:border-[#00A2AA] focus:ring-0 bg-white text-gray-900 placeholder-gray-400 transition"
               placeholder="Digite seu email"
               required
               autoComplete="username"
@@ -93,7 +96,7 @@ export default function Login() {
 
           {/* Password Field */}
           <div className="space-y-2">
-            <label htmlFor="password" className="text-teal-600 font-medium text-sm">
+            <label htmlFor="password" className="block text-[#5B5858] font-medium text-sm mb-1">
               Senha
             </label>
             <div className="relative">
@@ -102,7 +105,7 @@ export default function Login() {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 pr-12 border-2 border-teal-400 rounded-lg focus:border-teal-600 focus:ring-0 bg-white text-gray-900 placeholder-gray-400"
+                className="w-full px-4 py-3 pr-12 border-2 border-[#00A2AA]/50 rounded-lg focus:border-[#00A2AA] focus:ring-0 bg-white text-gray-900 placeholder-gray-400 transition"
                 placeholder="Digite sua senha"
                 required
                 autoComplete="current-password"
@@ -110,7 +113,7 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-teal-400 hover:text-teal-600 transition-colors"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#00A2AA] hover:text-[#00A2AA]/80 transition-colors"
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff className="w-5 h-5 hover:cursor-pointer" /> : <Eye className="w-5 h-5 hover:cursor-pointer" />}
@@ -133,13 +136,13 @@ export default function Login() {
                 onChange={(e) => setKeepLoggedIn(e.target.checked)}
                 className="border-teal-400 accent-teal-600 cursor-pointer"
               />
-              <label htmlFor="keep-logged-in" className="text-sm text-teal-600 cursor-pointer">
+              <label htmlFor="keep-logged-in" className="text-sm text-[#5B5858] cursor-pointer">
                 Manter conectado
               </label>
             </div>
             <Link
               href="/forgot-password"
-              className="text-sm text-teal-600 hover:text-teal-700 hover:underline transition-colors"
+              className="text-sm text-[#00A2AA] hover:text-[#00A2AA]/80 hover:underline transition-colors"
             >
               Esqueceu a senha?
             </Link>
@@ -148,7 +151,7 @@ export default function Login() {
           {/* Login Button */}
           <button
             type="submit"
-            className="w-full bg-teal-600 hover:bg-teal-700 hover:cursor-pointer text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 text-base"
+            className={`w-full bg-teal-600 hover:bg-teal-700 hover:cursor-pointer disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 text-base shadow`}
             disabled={loading}
           >
             {loading ? "Entrando..." : "Entrar"}
@@ -157,9 +160,9 @@ export default function Login() {
 
         {/* Register Link */}
         <div className="text-center pt-4">
-          <p className="text-teal-600 text-sm">
+          <p className="text-[#5B5858] text-sm">
             Ainda não possui conta?{" "}
-            <Link href="/register" className="font-medium  hover:text-teal-700 underline transition-colors">
+            <Link href="/register" className="font-medium text-[#00A2AA] hover:text-[#00A2AA]/80 underline transition-colors">
               Cadastre-se
             </Link>
           </p>
