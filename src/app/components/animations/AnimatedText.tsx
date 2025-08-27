@@ -1,8 +1,6 @@
 "use client"
 
-import { motion } from 'framer-motion';
-import { useInView } from 'framer-motion';
-import { useRef, ReactNode } from 'react';
+import { useRef, useEffect, useState, ReactNode } from 'react';
 import { useIsMobile, useReducedMotion } from './hooks';
 
 interface AnimatedTextProps {
@@ -18,60 +16,72 @@ export default function AnimatedText({
   className = "",
   duration = 0.6
 }: AnimatedTextProps) {
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
   const { isMobile, isTablet } = useIsMobile();
   const prefersReducedMotion = useReducedMotion();
-  
-  const isInView = useInView(ref, { 
-    once: true, 
-    // Inicia animação assim que entra no viewport para mobile
-    margin: isMobile ? "0px 0px -30px 0px" : isTablet ? "-50px 0px -100px 0px" : "-100px 0px -100px 0px"
-  });
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          const adjustedDelay = isMobile ? delay * 0.1 : isTablet ? delay * 0.3 : delay;
+          
+          setTimeout(() => {
+            setIsVisible(true);
+          }, adjustedDelay);
+          
+          observer.unobserve(entry.target);
+        }
+      },
+      {
+        rootMargin: isMobile ? "0px 0px -30px 0px" : 
+                   isTablet ? "-50px 0px -100px 0px" : 
+                   "-100px 0px -100px 0px",
+        threshold: 0.1
+      }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, [delay, isMobile, isTablet]);
 
   // Movimento reduzido
   if (prefersReducedMotion) {
     return (
-      <motion.div
+      <div
         ref={ref}
-        className={className}
-        initial={{ opacity: 0 }}
-        animate={isInView ? { opacity: 1 } : { opacity: 0 }}
-        transition={{ duration: 0.25 }}
+        className={`${className} transition-opacity duration-300 ${
+          isVisible ? 'opacity-100' : 'opacity-0'
+        }`}
       >
         {children}
-      </motion.div>
+      </div>
     );
   }
 
+  const responsiveDuration = isMobile ? duration * 0.5 : isTablet ? duration * 0.7 : duration;
+
   return (
-    <motion.div
+    <div
       ref={ref}
-      className={className}
-      initial={{ opacity: 0, y: isMobile ? 10 : isTablet ? 20 : 30, scale: 0.99 }}
-      animate={isInView ? { 
-        opacity: 1, 
-        y: 0, 
-        scale: 1 
-      } : { 
-        opacity: 0, 
-        y: isMobile ? 10 : isTablet ? 20 : 30, 
-        scale: 0.99 
+      className={`${className} transition-all ease-out transform ${
+        isVisible 
+          ? 'opacity-100 translate-y-0 scale-100' 
+          : `opacity-0 ${
+              isMobile ? 'translate-y-2' : 
+              isTablet ? 'translate-y-4' : 
+              'translate-y-6'
+            } scale-95`
+      } hover:scale-105`}
+      style={{
+        transitionDuration: `${responsiveDuration * 1000}ms`
       }}
-      transition={{
-        // Delays mínimos para mobile
-        duration: isMobile ? duration * 0.5 : isTablet ? duration * 0.7 : duration,
-        delay: isMobile ? (delay * 0.1) / 1000 : isTablet ? (delay * 0.3) / 1000 : delay / 1000,
-        ease: isMobile ? [0.25, 0.1, 0.25, 1] : [0.25, 0.1, 0.25, 1],
-        type: "spring",
-        stiffness: isMobile ? 280 : isTablet ? 200 : 150,
-        damping: isMobile ? 35 : isTablet ? 28 : 22
-      }}
-      whileHover={!isMobile ? {
-        scale: isTablet ? 1.01 : 1.02,
-        transition: { duration: 0.15, ease: "easeOut" }
-      } : {}}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
