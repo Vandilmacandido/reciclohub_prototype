@@ -59,13 +59,13 @@ export default function Home() {
             </Link>
             <Link
               href="/register"
-              className="rounded-md bg-[#00A2AA] px-4 py-2 text-sm md:text-base font-semibold text-white hover:bg-teal-600"
+              className="rounded-md bg-[#00A2AA] px-4 py-2 text-sm md:text-base font-semibold text-white hover:bg-teal-600 min-w-[100px] text-center"
             >
               Cadastre-se
             </Link>
             <Link
               href="/login"
-              className="rounded-md bg-[#00A2AA] px-4 py-2 text-sm md:text-base font-medium text-white hover:bg-teal-600"
+              className="rounded-md border-2 border-[#00A2AA] px-4 py-2 text-sm md:text-base font-semibold text-[#00A2AA] hover:bg-[#00A2AA] hover:text-white transition-all duration-200 min-w-[100px] text-center"
             >
               Login
             </Link>
