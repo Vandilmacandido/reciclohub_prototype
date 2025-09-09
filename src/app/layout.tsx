@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { MatchModalContainer } from "./modals/match";
 import ConditionalLayout from "./components/ConditionalLayout";
-import OrientationController from "./components/OrientationController";
 
-const poppins = Poppins({
-  variable: "--font-poppins",
+const geistSans = Geist({
+  variable: "--font-geist-sans",
   subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
@@ -17,17 +20,6 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
   },
-  other: {
-    'screen-orientation': 'portrait',
-    'orientation': 'portrait',
-  },
-};
-
-export const viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export default function RootLayout({
@@ -37,17 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <head>
-        <meta name="screen-orientation" content="portrait" />
-        <meta name="orientation" content="portrait" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-orientation" content="portrait" />
-        <meta name="msapplication-orientation" content="portrait" />
-      </head>
-      <body className={`${poppins.variable} antialiased`}>
-        <OrientationController />
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {/* MatchModalContainer ficará disponível em todas as páginas */}
         <MatchModalContainer />
         <ConditionalLayout>{children}</ConditionalLayout>

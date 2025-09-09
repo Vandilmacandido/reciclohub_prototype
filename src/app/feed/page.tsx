@@ -5,8 +5,31 @@ import io from "socket.io-client"
 import { ResiduoService, type Residuo } from "@/services/residuoService"
 import { ProposalModal } from "@/app/modals/proposal"
 
-
 let socket: ReturnType<typeof io> | null = null;
+
+// ========================================
+// NOVO: Interface para as métricas do dashboard
+// ========================================
+interface DashboardMetrics {
+  residuosAnunciados: {
+    total: number;
+    incremento: number;
+    periodo: string;
+  };
+  transacoesConcluidas: {
+    total: number;
+    periodo: string;
+  };
+  economiaGerada: {
+    valor: number;
+    incrementoPercentual: number;
+    periodo: string;
+  };
+  empresasConectadas: {
+    total: number;
+    novasParcerias: number;
+  };
+}
 
 export default function FeedPage() {
   const [residuos, setResiduos] = useState<Residuo[]>([])
@@ -16,22 +39,65 @@ export default function FeedPage() {
   const [selectedCity, setSelectedCity] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  
+
   // Estados para o modal de proposta
   const [showProposalModal, setShowProposalModal] = useState(false)
   const [selectedResidue, setSelectedResidue] = useState<Residuo | null>(null)
 
-  // Carregar resíduos
+  // ========================================
+  // NOVO: Estado para as métricas do dashboard
+  // ========================================
+  const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null)
+
+  // ========================================
+  // NOVO: Dados fixos para as métricas do dashboard
+  // Estes dados são estáticos e representam métricas gerais do sistema
+  // ========================================
+  const getDashboardMetrics = (): DashboardMetrics => {
+    return {
+      residuosAnunciados: {
+        total: 12, // Dados fixos - total geral do sistema
+        incremento: 3,
+        periodo: "este mês"
+      },
+      transacoesConcluidas: {
+        total: 8, // Dados fixos - transações do sistema
+        periodo: "Este mês"
+      },
+      economiaGerada: {
+        valor: 3250, // Dados fixos - R$ 3.250
+        incrementoPercentual: 15,
+        periodo: "mês passado"
+      },
+      empresasConectadas: {
+        total: 7, // Dados fixos - 7 empresas
+        novasParcerias: 1
+      }
+    };
+  };
+
+  // ========================================
+  // NOVO: Função para formatar valores monetários
+  // ========================================
+  const formatCurrency = (value: number): string => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 0
+    }).format(value);
+  };
+
+  // Carregar resíduos (função original mantida intacta)
   const loadResiduos = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-      
+
       const response = await ResiduoService.getAllResiduos({
         limit: 9, // 3x3 grid
         offset: (currentPage - 1) * 9
       })
-      
+
       if (response.success) {
         setResiduos(response.data)
         const total = response.pagination?.total || 0
@@ -49,9 +115,17 @@ export default function FeedPage() {
 
   useEffect(() => {
     loadResiduos()
+
+    // ========================================
+    // NOVO: Carregar métricas fixas apenas uma vez
+    // ========================================
+    if (!dashboardMetrics) {
+      const metrics = getDashboardMetrics();
+      setDashboardMetrics(metrics);
+    }
   }, [currentPage, loadResiduos])
 
-  // Atualização instantânea via Socket.IO
+  // Atualização instantânea via Socket.IO 
   useEffect(() => {
     if (!socket) {
       socket = io(); // Usa a URL padrão do backend, ajuste se necessário
@@ -63,6 +137,7 @@ export default function FeedPage() {
         // Só adiciona se estiver na primeira página
         if (currentPage === 1) {
           const novaLista = [novoResiduo, ...prev];
+
           // Limita a 9 itens (página cheia)
           return novaLista.slice(0, 9);
         }
@@ -79,10 +154,10 @@ export default function FeedPage() {
     return () => {
       socket?.off("residuo-registrado", handleResiduoRegistrado);
     };
-     
+
   }, [currentPage, residuos.length]);
 
-  // Busca avançada
+  // Busca avançada (mantida intacta, apenas com atualização das métricas)
   const handleSearch = async () => {
     if (!searchTerm.trim() && !selectedCity) {
       loadResiduos()
@@ -92,7 +167,7 @@ export default function FeedPage() {
     try {
       setLoading(true)
       setError(null)
-      
+
       const filters: {
         page?: number
         limit?: number
@@ -102,17 +177,17 @@ export default function FeedPage() {
         page: 1,
         limit: 9
       }
-      
+
       if (searchTerm.trim()) {
         filters.search = searchTerm.trim()
       }
-      
+
       if (selectedCity && selectedCity !== "Todas as cidades" && selectedCity !== "Outras cidades") {
         filters.cidade = selectedCity
       }
-      
+
       const response = await ResiduoService.advancedSearch(filters)
-      
+
       if (response.success) {
         setResiduos(response.data)
         setTotalPages(response.pagination?.totalPages || 1)
@@ -128,38 +203,38 @@ export default function FeedPage() {
     }
   }
 
-  // Função para abrir modal de proposta
+  // Função para abrir modal de proposta 
   const handleMakeProposal = (residuo: Residuo) => {
     const empresaId = localStorage.getItem("empresaId")
     if (!empresaId) {
       alert("Você precisa estar logado para fazer uma proposta")
       return
     }
-    
+
     // Verificar se não é a própria empresa
     if (residuo.empresa.id === parseInt(empresaId)) {
       alert("Você não pode fazer proposta para seu próprio resíduo")
       return
     }
-    
+
     setSelectedResidue(residuo)
     setShowProposalModal(true)
   }
 
-  // Função para fechar modal
+  // Função para fechar modal 
   const handleCloseProposalModal = () => {
     setShowProposalModal(false)
     setSelectedResidue(null)
   }
 
-  // Formatar preço
+  // Formatar preço 
   const formatPrice = (preco: string | undefined, disponibilidade: string) => {
     if (disponibilidade === "doacao") return "Gratuito"
     if (disponibilidade === "retirada") return "Retirada"
     return preco || "Preço não informado"
   }
 
-  // Apenas cidades de Pernambuco (sem duplicatas)
+  // Apenas cidades de Pernambuco 
   const locations = [
     "Todas as cidades",
     "Recife",
@@ -231,7 +306,7 @@ export default function FeedPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen">
       {/* Título da página */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Search and Filters */}
@@ -241,7 +316,7 @@ export default function FeedPage() {
             <input
               type="text"
               placeholder="Buscar por empresa ou material..."
-              className="pl-10 bg-white border text-gray-900 border-[#00A2AA]/50 h-12 rounded w-full focus:border-[#00A2AA]"
+              className="pl-10 bg-white border text-gray-900 border-gray-300 h-12 rounded w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
@@ -249,7 +324,7 @@ export default function FeedPage() {
           </div>
           <div className="w-full md:w-64">
             <select
-              className="bg-white border text-gray-900 border-[#00A2AA]/50 h-12 rounded w-full px-3 focus:border-[#00A2AA]"
+              className="bg-white border text-gray-900 border-gray-300 h-12 rounded w-full px-3"
               value={selectedCity}
               onChange={(e) => setSelectedCity(e.target.value)}
             >
@@ -266,6 +341,85 @@ export default function FeedPage() {
             Buscar
           </button>
         </div>
+
+        {/* ========================================
+            NOVO: Dashboard de Métricas
+            ======================================== */}
+        {dashboardMetrics && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            {/* Campo 1: Resíduos Anunciados */}
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">
+                    Resíduos Anunciados
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {dashboardMetrics.residuosAnunciados.total}
+                  </p>
+                  <p className="text-sm text-green-600 font-medium">
+                    +{dashboardMetrics.residuosAnunciados.incremento} {dashboardMetrics.residuosAnunciados.periodo}
+                  </p>
+                </div>
+                {/* <div className="text-3xl">📦</div> */}
+              </div>
+            </div>
+
+            {/* Campo 2: Transações Concluídas */}
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">
+                    Transações Concluídas
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {dashboardMetrics.transacoesConcluidas.total}
+                  </p>
+                  <p className="text-sm text-gray-500 font-medium">
+                    {dashboardMetrics.transacoesConcluidas.periodo}
+                  </p>
+                </div>
+                {/* <div className="text-3xl">✅</div> */}
+              </div>
+            </div>
+
+            {/* Campo 3: Economia Gerada */}
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">
+                    Economia Gerada
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {formatCurrency(dashboardMetrics.economiaGerada.valor)}
+                  </p>
+                  <p className="text-sm text-green-600 font-medium">
+                    +{dashboardMetrics.economiaGerada.incrementoPercentual}% {dashboardMetrics.economiaGerada.periodo}
+                  </p>
+                </div>
+                {/* <div className="text-3xl">💰</div> */}
+              </div>
+            </div>
+
+            {/* Campo 4: Empresas Conectadas */}
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">
+                    Empresas Conectadas
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {dashboardMetrics.empresasConectadas.total}
+                  </p>
+                  <p className="text-sm text-green-600 font-medium">
+                    +{dashboardMetrics.empresasConectadas.novasParcerias} nova parceria
+                  </p>
+                </div>
+                {/* <div className="text-3xl">🤝</div> */}
+              </div>
+            </div>
+          </div>
+        )}
 
         <h1 className="text-2xl pt-4 pb-4 font-bold text-gray-900 mb-4 md:mb-0">
           Resíduos Ofertados
@@ -287,7 +441,7 @@ export default function FeedPage() {
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
             <p className="text-red-600">{error}</p>
-            <button 
+            <button
               onClick={loadResiduos}
               className="mt-2 text-red-600 hover:text-red-800 underline"
             >
@@ -323,7 +477,7 @@ export default function FeedPage() {
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Conteúdo */}
                     <div className="flex-1 flex flex-col justify-between px-5 py-4">
                       <div>
@@ -341,7 +495,7 @@ export default function FeedPage() {
                           📍 {residuo.empresa.cidade}, {residuo.empresa.estado}
                         </div>
                       </div>
-                      
+
                       <div className="flex items-end justify-between mt-2">
                         <span className="text-teal-600 font-bold text-base">
                           {formatPrice(residuo.preco, residuo.disponibilidade)}
@@ -364,8 +518,8 @@ export default function FeedPage() {
                   Nenhum resíduo encontrado
                 </h3>
                 <p className="text-gray-500 mb-6">
-                  {searchTerm || selectedCity ? 
-                    'Tente ajustar os filtros de busca ou limpar a pesquisa.' : 
+                  {searchTerm || selectedCity ?
+                    'Tente ajustar os filtros de busca ou limpar a pesquisa.' :
                     'Ainda não há resíduos cadastrados no sistema.'
                   }
                 </p>
@@ -385,7 +539,7 @@ export default function FeedPage() {
               </div>
             )}
 
-            {/* Paginação */}
+            {/* Paginação  */}
             {residuos.length > 0 && totalPages > 1 && (
               <div className="flex justify-center items-center mt-8 space-x-2">
                 <button
@@ -395,7 +549,7 @@ export default function FeedPage() {
                 >
                   Anterior
                 </button>
-                
+
                 <div className="flex space-x-1">
                   {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                     const page = i + 1
@@ -403,18 +557,17 @@ export default function FeedPage() {
                       <button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        className={`px-3 py-2 rounded-lg ${
-                          currentPage === page
+                        className={`px-3 py-2 rounded-lg ${currentPage === page
                             ? 'bg-teal-600 text-white'
                             : 'border border-gray-300 hover:bg-gray-50'
-                        }`}
+                          }`}
                       >
                         {page}
                       </button>
                     )
                   })}
                 </div>
-                
+
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages}
@@ -427,7 +580,7 @@ export default function FeedPage() {
           </>
         )}
       </div>
-      
+
       {/* Modal de Proposta */}
       <ProposalModal
         isOpen={showProposalModal}

@@ -18,17 +18,16 @@ model Residuos {
   preco           String?
   empresaId       Int
   userId          String
-  imagens         ImagemResiduos[] // Relacionamento 1-N com imagens
-  propostas       Propostas[]      // Relacionamento 1-N com propostas
-
-  empresa Empresas @relation(fields: [empresaId], references: [id])
+  imagens         ImagemResiduos[]
+  propostas       Propostas[]
+  empresa         Empresas         @relation(fields: [empresaId], references: [id])
 
   @@map("residuos")
 }
 
 model ImagemResiduos {
   id        Int      @id @default(autoincrement())
-  url       String   // Agora armazena apenas a URL pública do S3
+  url       String
   residuoId Int
   residuo   Residuos @relation(fields: [residuoId], references: [id])
 
@@ -36,87 +35,91 @@ model ImagemResiduos {
 }
 
 model Empresas {
-  id                Int     @id @default(autoincrement())
-  nome              String
-  email             String  @unique
-  telefone          String
-  password          String
-  cnpj              String  @unique
-  rua               String
-  numero            String
-  cep               String
-  cidade            String
-  estado            String
-  pais              String
-  aceiteTermos      Boolean
-  aceitePrivacidade Boolean
-
-  residuos Residuos[]
-  propostasEnviadas Propostas[] @relation("EmpresaProponente")
-  propostasRecebidas Propostas[] @relation("EmpresaReceptora")
-  notificacoes Notificacoes[]
-
-  chatMessages ChatMessage[] @relation("EmpresaChatMessages")
-  chatLastSeen ChatLastSeen[]
+  id                 Int            @id @default(autoincrement())
+  nome               String
+  email              String         @unique
+  telefone           String
+  password           String
+  cnpj               String         @unique
+  rua                String
+  numero             String
+  cep                String
+  cidade             String
+  estado             String
+  pais               String
+  aceiteTermos       Boolean
+  aceitePrivacidade  Boolean
+  chatLastSeen       ChatLastSeen[]
+  chatMessages       ChatMessage[]  @relation("EmpresaChatMessages")
+  notificacoes       Notificacoes[]
+  propostasEnviadas  Propostas[]    @relation("EmpresaProponente")
+  propostasRecebidas Propostas[]    @relation("EmpresaReceptora")
+  residuos           Residuos[]
 
   @@map("empresas")
 }
 
 model Propostas {
-  id               Int      @id @default(autoincrement())
-  quantidade       String
-  frequencia       String
-  preco           String?
-  mensagem        String?
-  tipoTransporte  String
-  status          StatusProposta @default(PENDENTE)
-  criadaEm        DateTime @default(now())
-  atualizadaEm    DateTime @updatedAt
-  
-  // Relacionamentos
-  residuoId       Int
+  id                  Int            @id @default(autoincrement())
+  quantidade          String
+  frequencia          String
+  preco               String?
+  mensagem            String?
+  tipoTransporte      String
+  status              StatusProposta @default(PENDENTE)
+  criadaEm            DateTime       @default(now())
+  atualizadaEm        DateTime       @updatedAt
+  residuoId           Int
   empresaProponenteId Int
   empresaReceptoraId  Int
-  
-  residuo         Residuos @relation(fields: [residuoId], references: [id], onDelete: Cascade)
-  empresaProponente Empresas @relation("EmpresaProponente", fields: [empresaProponenteId], references: [id])
-  empresaReceptora  Empresas @relation("EmpresaReceptora", fields: [empresaReceptoraId], references: [id])
-  
-  notificacoes Notificacoes[]
-  chatMessages ChatMessage[] @relation("PropostaChatMessages")
-  chatLastSeen ChatLastSeen[]
+  chatLastSeen        ChatLastSeen[]
+  chatMessages        ChatMessage[]  @relation("PropostaChatMessages")
+  notificacoes        Notificacoes[]
+  empresaProponente   Empresas       @relation("EmpresaProponente", fields: [empresaProponenteId], references: [id])
+  empresaReceptora    Empresas       @relation("EmpresaReceptora", fields: [empresaReceptoraId], references: [id])
+  residuo             Residuos       @relation(fields: [residuoId], references: [id], onDelete: Cascade)
+
   @@map("propostas")
 }
 
 model ChatMessage {
-  id         Int      @id @default(autoincrement())
-  matchId    Int      // id da proposta aceita (Propostas.id)
-  senderId   Int      // empresaId do remetente
-  content    String
-  timestamp  DateTime @default(now())
-
-  match      Propostas @relation("PropostaChatMessages", fields: [matchId], references: [id], onDelete: Cascade)
-  sender     Empresas  @relation("EmpresaChatMessages", fields: [senderId], references: [id])
+  id        Int       @id @default(autoincrement())
+  matchId   Int
+  senderId  Int
+  content   String
+  timestamp DateTime  @default(now())
+  match     Propostas @relation("PropostaChatMessages", fields: [matchId], references: [id], onDelete: Cascade)
+  sender    Empresas  @relation("EmpresaChatMessages", fields: [senderId], references: [id])
 
   @@map("chat_messages")
 }
 
 model Notificacoes {
-  id          Int      @id @default(autoincrement())
+  id          Int             @id @default(autoincrement())
   tipo        TipoNotificacao
   titulo      String
   mensagem    String
-  visualizada Boolean  @default(false)
-  criadaEm    DateTime @default(now())
-  
-  // Relacionamentos
+  visualizada Boolean         @default(false)
+  criadaEm    DateTime        @default(now())
   empresaId   Int
   propostaId  Int?
-  
-  empresa     Empresas @relation(fields: [empresaId], references: [id])
-  proposta    Propostas? @relation(fields: [propostaId], references: [id], onDelete: Cascade)
+  empresa     Empresas        @relation(fields: [empresaId], references: [id])
+  proposta    Propostas?      @relation(fields: [propostaId], references: [id], onDelete: Cascade)
 
   @@map("notificacoes")
+}
+
+model ChatLastSeen {
+  id                Int       @id @default(autoincrement())
+  matchId           Int
+  empresaId         Int
+  lastSeenMessageId Int
+  updatedAt         DateTime  @updatedAt
+  empresa           Empresas  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  match             Propostas @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId, empresaId])
+  @@map("chat_last_seen")
 }
 
 enum StatusProposta {
@@ -131,18 +134,3 @@ enum TipoNotificacao {
   PROPOSTA_REJEITADA
   MATCH_CONFIRMADO
 }
-
-model ChatLastSeen {
-  id                 Int      @id @default(autoincrement())
-  matchId            Int
-  empresaId          Int
-  lastSeenMessageId  Int
-  updatedAt          DateTime @updatedAt
-
-  match    Propostas @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  empresa  Empresas  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
-
-  @@unique([matchId, empresaId])
-  @@map("chat_last_seen")
-}
-// prisma/schema.prisma

@@ -107,13 +107,13 @@ export default function RegisterStep2() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br bg-[#00A2AA]/14 px-4 py-8">
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-lg p-8 space-y-8 border border-teal-100">
-        {/* Logo e título */}
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 py-8">
+      <div className="w-full max-w-md space-y-8">
+        {/* Logo */}
         <div className="text-center">
           <div className="flex items-center justify-center mb-4">
             <Image
-              src="/reciclohub.newLogo.svg"
+              src="/RECICLOHUB_Green.png"
               alt="RECICLOHUB Logo"
               width={160}
               height={80}
@@ -121,13 +121,13 @@ export default function RegisterStep2() {
               priority
             />
           </div>
-          <h2 className="text-xl font-semibold text-[#00A2AA] mb-2">Cadastro</h2>
+          <h2 className="text-xl font-medium text-teal-600 mb-2">CADASTRO</h2>
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <div className="w-8 h-1 bg-[#00A2AA] rounded-full"></div>
-            <div className="w-8 h-1 bg-[#00A2AA] rounded-full"></div>
-            <div className="w-8 h-1 bg-gray-200 rounded-full"></div>
+            <div className="w-8 h-1 bg-teal-600 rounded-full"></div>
+            <div className="w-8 h-1 bg-teal-400 rounded-full"></div>
+            <div className="w-8 h-1 bg-gray-300 rounded-full"></div>
           </div>
-          <p className="text-sm text-[#716F6F]">Etapa 2 de 3 - Informações de Contato</p>
+          <p className="text-sm text-teal-600">Etapa 2 de 3 - Informações de Contato</p>
         </div>
 
         {/* Form */}
@@ -141,7 +141,7 @@ export default function RegisterStep2() {
 
             {/* CEP */}
             <div className="space-y-2">
-              <label htmlFor="cep" className="block text-[#5B5858] font-medium text-sm mb-1">
+              <label htmlFor="cep" className="text-teal-600 font-medium text-sm">
                 CEP *
               </label>
               <input
@@ -149,8 +149,8 @@ export default function RegisterStep2() {
                 type="text"
                 value={formData.cep}
                 onChange={(e) => handleCEPChange(e.target.value)}
-                className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-0 bg-white text-gray-900 placeholder-gray-400 transition ${
-                  errors.cep ? "border-red-400 focus:border-red-600" : "border-[#00A2AA]/50 focus:border-[#00A2AA]"
+                className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-0 bg-white text-gray-900 placeholder-gray-400 ${
+                  errors.cep ? "border-red-400 focus:border-red-600" : "border-teal-400 focus:border-teal-600"
                 }`}
                 placeholder="00000-000"
                 disabled={cepLoading}
@@ -160,7 +160,7 @@ export default function RegisterStep2() {
 
             {/* Street */}
             <div className="space-y-2">
-              <label htmlFor="street" className="block text-[#5B5858] font-medium text-sm mb-1">
+              <label htmlFor="street" className="text-teal-600 font-medium text-sm">
                 Endereço *
               </label>
               <input
@@ -168,8 +168,8 @@ export default function RegisterStep2() {
                 type="text"
                 value={formData.street}
                 onChange={(e) => handleInputChange("street", e.target.value)}
-                className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-0 bg-white text-gray-900 placeholder-gray-400 transition ${
-                  errors.street ? "border-red-400 focus:border-red-600" : "border-[#00A2AA]/50 focus:border-[#00A2AA]"
+                className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-0 bg-white text-gray-900 placeholder-gray-400 ${
+                  errors.street ? "border-red-400 focus:border-red-600" : "border-teal-400 focus:border-teal-600"
                 }`}
                 placeholder="Rua, Avenida..."
               />
@@ -178,7 +178,7 @@ export default function RegisterStep2() {
 
             {/* Número */}
             <div className="space-y-2">
-              <label htmlFor="numero" className="block text-[#5B5858] font-medium text-sm mb-1">
+              <label htmlFor="numero" className="text-teal-600 font-medium text-sm">
                 Número *
               </label>
               <input
@@ -186,8 +186,8 @@ export default function RegisterStep2() {
                 type="text"
                 value={formData.numero}
                 onChange={(e) => handleInputChange("numero", e.target.value)}
-                className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-0 bg-white text-gray-900 placeholder-gray-400 transition ${
-                  errors.numero ? "border-red-400 focus:border-red-600" : "border-[#00A2AA]/50 focus:border-[#00A2AA]"
+                className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-0 bg-white text-gray-900 placeholder-gray-400 ${
+                  errors.numero ? "border-red-400 focus:border-red-600" : "border-teal-400 focus:border-teal-600"
                 }`}
                 placeholder="Número"
                 required
@@ -198,7 +198,7 @@ export default function RegisterStep2() {
             {/* City and State */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <label htmlFor="city" className="block text-[#5B5858] font-medium text-sm mb-1">
+                <label htmlFor="city" className="text-teal-600 font-medium text-sm">
                   Cidade *
                 </label>
                 <input
@@ -206,15 +206,15 @@ export default function RegisterStep2() {
                   type="text"
                   value={formData.city}
                   onChange={(e) => handleInputChange("city", e.target.value)}
-                  className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-0 bg-white text-gray-900 placeholder-gray-400 transition ${
-                    errors.city ? "border-red-400 focus:border-red-600" : "border-[#00A2AA]/50 focus:border-[#00A2AA]"
+                  className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-0 bg-white text-gray-900 placeholder-gray-400 ${
+                    errors.city ? "border-red-400 focus:border-red-600" : "border-teal-400 focus:border-teal-600"
                   }`}
                   placeholder="Sua cidade"
                 />
                 {errors.city && <p className="text-red-500 text-xs">{errors.city}</p>}
               </div>
               <div className="space-y-2">
-                <label htmlFor="state" className="block text-[#5B5858] font-medium text-sm mb-1">
+                <label htmlFor="state" className="text-teal-600 font-medium text-sm">
                   Estado *
                 </label>
                 <input
@@ -222,14 +222,14 @@ export default function RegisterStep2() {
                   type="text"
                   value="Pernambuco"
                   disabled
-                  className="w-full px-4 py-3 border-2 border-[#00A2AA]/50 rounded-lg bg-gray-100 text-gray-900"
+                  className="w-full px-4 py-3 border-2 border-teal-400 rounded-lg bg-gray-100 text-gray-900"
                 />
               </div>
             </div>
 
             {/* Country */}
             <div className="space-y-2">
-              <label htmlFor="country" className="block text-[#5B5858] font-medium text-sm mb-1">
+              <label htmlFor="country" className="text-teal-600 font-medium text-sm">
                 País
               </label>
               <input
@@ -237,7 +237,7 @@ export default function RegisterStep2() {
                 type="text"
                 value={formData.country}
                 onChange={(e) => handleInputChange("country", e.target.value)}
-                className="w-full px-4 py-3 border-2 border-[#00A2AA]/50 rounded-lg focus:border-[#00A2AA] focus:ring-0 bg-white text-gray-900 placeholder-gray-400 transition"
+                className="w-full px-4 py-3 border-2 border-teal-400 rounded-lg focus:border-teal-600 focus:ring-0 bg-white text-gray-900 placeholder-gray-400"
                 placeholder="Brasil"
               />
             </div>
@@ -247,7 +247,7 @@ export default function RegisterStep2() {
           <div className="flex space-x-4 pt-4">
             <button
               type="button"
-              className="flex-1 bg-[#00A2AA] hover:bg-[#008C8C] text-white border hover:cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+              className="flex-1 bg-[#7FD0D4] hover:bg-[#00A2AA] text-white border border-teal-300 hover:cursor-pointer font-bold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
               onClick={() => router.push("/register")}
             >
               <ChevronLeft className="w-4 h-4" />
@@ -256,7 +256,7 @@ export default function RegisterStep2() {
             <button
               type="submit"
               disabled={!isFormValid()}
-              className="flex-1 bg-[#00A2AA] hover:bg-[#008C8C] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200 cursor-pointer"
+              className="flex-1 bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200 cursor-pointer"
             >
               Próximo
             </button>
